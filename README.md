@@ -96,3 +96,9 @@ node scripts/pancake-sync.mjs --mock scripts/fixtures/pancake-products.sample.js
 - **Giá**: lấy giá thấp nhất trong các variation đang bán. Sản phẩm không có variation/giá sẽ bị bỏ qua (log `no-price`).
 - **Phân trang**: website hiển thị 24 sản phẩm/lần, nút “Xem thêm” tải tiếp — phù hợp catalog vài trăm sản phẩm.
 - Danh mục chưa map hoặc sản phẩm bị bỏ qua đều được log rõ trong GitHub Actions.
+
+### Logo thương hiệu
+
+- Huy hiệu (bướm + khung hoa văn) được tách từ avatar Facebook chính thức của shop (`facebook.com/almira.studiooo`), nền đã làm trong suốt.
+- Nhúng trực tiếp dạng base64 trong `index.html`: badge cạnh tên shop ở hero, logo màn hình intro và favicon/apple-touch-icon — site vẫn là single-file, không phụ thuộc file ngoài.
+- Muốn đổi logo: tạo ảnh vuông nền trong suốt, thay chuỗi base64 trong `index.html` (tìm `data:image/webp;base64` và `data:image/png;base64`).
