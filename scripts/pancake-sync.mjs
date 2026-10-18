@@ -77,6 +77,22 @@ function normalizeImage(url) {
   return u;
 }
 
+function collectImages(raw, variations, fallback) {
+  const out = [];
+  const push = (value) => {
+    const items = Array.isArray(value) ? value : [value];
+    for (const item of items) {
+      const url = normalizeImage(typeof item === "string" ? item : item?.url || item?.src || item?.image);
+      if (url && !out.includes(url)) out.push(url);
+    }
+  };
+  push(fallback);
+  push(raw.images);
+  push(raw.image);
+  for (const variation of variations) push(variation.images);
+  return out.slice(0, Number(cfg.maxImages) || 8);
+}
+
 /* ---------------- Pancake API ---------------- */
 async function fetchPage(pageNumber) {
   const url = new URL(`${BASE_URL}/shops/${encodeURIComponent(SHOP_ID)}/products`);
@@ -310,14 +326,10 @@ function mapProduct(raw) {
   const price = prices.length ? Math.min(...prices) : Number(raw.price) || Number(raw.retail_price) || 0;
   if (!price) return { skip: "no-price" };
 
-  // Ảnh: Pancake có sản phẩm không có ảnh ở cấp product, ảnh nằm trong từng variation
-  let img = over.img || (raw.images || []).map(normalizeImage).filter(Boolean)[0] || normalizeImage(raw.image);
-  if (!img) {
-    for (const v of variations) {
-      const vi = (v.images || []).map(normalizeImage).filter(Boolean);
-      if (vi.length) { img = vi[0]; break; }
-    }
-  }
+  // Ảnh: Pancake có sản phẩm không có ảnh ở cấp product, ảnh nằm trong từng variation.
+  // Giữ nhiều ảnh để trang chi tiết có thể trượt qua gallery.
+  const images = collectImages(raw, variations, over.img);
+  const img = images[0];
   if (!img) return { skip: "no-image" };
 
   const colorNames = variantValues(raw, "color").slice(0, Number(cfg.maxColors) || 16);
@@ -344,6 +356,7 @@ function mapProduct(raw) {
     price: Math.round(price),
     was: over.was != null ? Math.round(Number(over.was)) || null : null,
     img,
+    images,
     tag: over.tag != null ? over.tag : deriveTag(raw, isNew),
     isNew,
     colors,

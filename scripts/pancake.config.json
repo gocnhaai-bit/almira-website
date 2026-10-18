@@ -10,6 +10,7 @@
   "brandBlocklist": ["GIAY", "DAM", "AO", "QUAN", "SET", "VAY", "TUI", "PHUKIEN", "VAITAM"],
   "maxColors": 16,
   "maxSizes": 16,
+  "maxImages": 8,
   "descFallback": "Sản phẩm order chính hãng, được kiểm tra kỹ trước khi giao và đóng gói chỉn chu.",
   "descFallbackEn": "Authentic made-to-order piece, checked and beautifully packed before delivery.",
   "name": {

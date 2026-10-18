@@ -9,7 +9,7 @@
       "is_published": true,
       "is_hidden": false,
       "image": null,
-      "images": ["https://picsum.photos/seed/almira-dam/600/800"],
+      "images": ["https://picsum.photos/seed/almira-dam/600/800", "https://picsum.photos/seed/almira-dam-2/600/800"],
       "description": "<p>Đầm lụa <b>satin</b> dáng dài, cổ đổ, xẻ tà.</p>",
       "brand_id": "brand-callmelater",
       "category_ids": [101],
@@ -20,7 +20,7 @@
         { "id": "attr-size", "name": "Size", "values": ["S", "M", "L"] }
       ],
       "variations": [
-        { "id": "v1", "retail_price": 2990000, "is_hidden": false, "fields": [{ "name": "Màu sắc", "value": "Kem ngà" }, { "name": "Size", "value": "S" }] },
+        { "id": "v1", "retail_price": 2990000, "is_hidden": false, "images": ["https://picsum.photos/seed/almira-dam-3/600/800"], "fields": [{ "name": "Màu sắc", "value": "Kem ngà" }, { "name": "Size", "value": "S" }] },
         { "id": "v2", "retail_price": 2890000, "is_hidden": false, "fields": [{ "name": "Màu sắc", "value": "Đen" }, { "name": "Size", "value": "M" }] },
         { "id": "v3", "retail_price": 1, "is_hidden": true, "fields": [] }
       ],
