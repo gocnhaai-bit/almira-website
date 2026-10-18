@@ -1,0 +1,50 @@
+{
+  "note": "Images selected from the shop’s live Pancake product catalog; local WebP copies for editorial/category use.",
+  "images": [
+    {
+      "file": "category-dam.webp",
+      "index": 3,
+      "id": "1b82ebb8-58c5-408e-8007-ce09ba64c4aa",
+      "brand": "ROMANCE",
+      "cat": "dam",
+      "source": "https://content.pancake.vn/2-2609/2026/9/7/baf02680d85e41edb8a1b8d742ae7bca7d3cc34d.png",
+      "name": "NANCI Đầm satin cổ chữ U cạp cao, viền ren, in hoa bóng"
+    },
+    {
+      "file": "category-ao.webp",
+      "index": 5,
+      "id": "ce5482d1-3f7f-4252-9d30-1646a09ac565",
+      "brand": "SELFMING",
+      "cat": "ao",
+      "source": "https://content.pancake.vn/2-2610/2026/10/9/b588172bf4c241e1faf47444bed70b771dd29010.png",
+      "name": "SelfMing Áo cardigan hai hàng cúc kiểu Napoleon, viền ren, ôm eo và cổ đứng"
+    },
+    {
+      "file": "category-set.webp",
+      "index": 10,
+      "id": "f9366c81-c025-4f93-a3a9-9a0c59c21569",
+      "brand": "OAKMOO",
+      "cat": "set",
+      "source": "https://content.pancake.vn/2-2512/2025/12/27/bc433548c60f7093a85dd48a892039e58546605d.png",
+      "name": "Bộ ba món mùa đông dành cho nữ: Set len gile dệt kim bằng lụa tơ tằm và len…"
+    },
+    {
+      "file": "category-khoac.webp",
+      "index": 12,
+      "id": "c07af82f-fb80-49d6-8832-5ad125da56f1",
+      "brand": "LUAMOSS",
+      "cat": "khoac",
+      "source": "https://content.pancake.vn/2-2610/2026/10/8/1d9602538e207dc5c9cef733167d8ac0187e60e1.png",
+      "name": "Áo khoác mỏng bằng len pha kiểu Hàn Quốc dành cho nữ, cổ áo rời, dáng rộng…"
+    },
+    {
+      "file": "about-almira.webp",
+      "index": 0,
+      "id": "41f206f8-331c-4e3a-a8d0-c73ada17c577",
+      "brand": "MOSTERTIMNOTHY",
+      "cat": "dam",
+      "source": "https://content.pancake.vn/2-2610/2026/10/10/3eba9e8320bd943b279b870f8bdf6f0339b9cec0.png",
+      "name": "Bộ váy yếm dáng rộng thoải mái nguyên bản gồm áo cardigan tay phồng và khăn…"
+    }
+  ]
+}

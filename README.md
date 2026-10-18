@@ -104,5 +104,11 @@ node scripts/pancake-sync.mjs --mock scripts/fixtures/pancake-products.sample.js
 ### Logo thương hiệu
 
 - Huy hiệu (bướm + khung hoa văn) được tách từ avatar Facebook chính thức của shop (`facebook.com/almira.studiooo`), nền đã làm trong suốt.
-- Nhúng trực tiếp dạng base64 trong `index.html`: badge cạnh tên shop ở hero, logo màn hình intro và favicon/apple-touch-icon — site vẫn là single-file, không phụ thuộc file ngoài.
-- Muốn đổi logo: tạo ảnh vuông nền trong suốt, thay chuỗi base64 trong `index.html` (tìm `data:image/webp;base64` và `data:image/png;base64`).
+- Logo dùng chung tại `assets/almira-emblem.webp`: hero, intro và footer. Favicon/apple-touch-icon vẫn nhúng base64 trong HTML.
+- Muốn đổi logo: thay file WebP nền trong suốt và cập nhật icon PNG base64 nếu cần.
+
+### Ảnh biên tập & trang hướng dẫn order
+
+- Ảnh danh mục và Về Almira là ảnh sản phẩm từ catalog thật của shop, tối ưu WebP và lưu tại `assets/editorial/`. `sources.json` ghi lại product ID, brand và URL gốc để đối chiếu; không dùng ảnh stock/demo.
+- `assets/order-guide.js` / `assets/order-guide.css` render trang hướng dẫn song ngữ: hero biên tập, timeline bốn bước, checklist, chính sách xác nhận, FAQ native và CTA. Class `og-` tránh xung đột motion legacy. Nội dung không phụ thuộc animation để xuất hiện; hỗ trợ reduced-motion.
+- Tiền cọc được diễn đạt là **50% giá trị đơn hàng sau giảm giá/chiết khấu (nếu có)**. Checkout hiện hiển thị giá trị theo giỏ hàng và chưa áp dụng ưu đãi bổ sung, nên tổng/cọc chỉ là **tạm tính**. Chưa có engine khuyến mại hay backend tính tổng cuối cùng: shop xác nhận ưu đãi, phí giao và số tiền cần thanh toán trước khi chốt đơn.
