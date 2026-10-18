@@ -86,3 +86,13 @@ node scripts/pancake-sync.mjs --mock scripts/fixtures/pancake-products.sample.js
 - **Gần thời gian thực hơn**: dùng Pancake webhook → một relay nhỏ (Cloudflare Worker) → gọi `repository_dispatch` để chạy sync ngay, hoặc Worker cache + proxy API cho website (API key vẫn giữ kín).
 - **Đẩy đơn hàng vào Pancake POS**: cần backend/proxy (Cloudflare Worker, Vercel) gọi `POST /shops/<SHOP_ID>/orders`; không thể gọi từ trình duyệt vì lộ API key.
 - **Chỉnh tần suất sync**: sửa `cron` trong `.github/workflows/sync-pancake.yml` (mặc định 30 phút/lần).
+
+### Ghi chú với catalog thật (đã kiểm thử 253 sản phẩm)
+
+- **Ảnh** lấy từ `variations[].images` (nhiều sản phẩm Pancake không có ảnh ở cấp product).
+- **Màu/Size** lấy từ `variations[].fields` vì `product_attributes` của Pancake là danh sách dùng chung toàn shop (có thể 50+ màu).
+- **Brand**: map `brand_id` nếu có → tách tiền tố viết hoa trong tên (vd `AOORAA`, `4MUGGLE`) → suy ra từ `custom_id` (vd `SUNSETPARK01`) → còn lại dùng `brandFallback`.
+- **Tên sản phẩm** được rút gọn: bỏ đoạn trong 【…】/[…], bỏ ngoặc kép, bỏ tiền tố brand, cắt tối đa 78 ký tự (`name.maxLength`). Card chỉ hiển thị 2 dòng, hover xem tên đầy đủ.
+- **Giá**: lấy giá thấp nhất trong các variation đang bán. Sản phẩm không có variation/giá sẽ bị bỏ qua (log `no-price`).
+- **Phân trang**: website hiển thị 24 sản phẩm/lần, nút “Xem thêm” tải tiếp — phù hợp catalog vài trăm sản phẩm.
+- Danh mục chưa map hoặc sản phẩm bị bỏ qua đều được log rõ trong GitHub Actions.

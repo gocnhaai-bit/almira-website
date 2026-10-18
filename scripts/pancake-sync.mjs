@@ -165,29 +165,91 @@ function resolveCategory(raw) {
   }
   const names = (raw.categories || []).map((c) => c.name || c).map(norm).filter(Boolean);
   const byName = cfg.categories?.byName || {};
+  const keysByLength = Object.keys(byName).sort((a, b) => b.length - a.length);
   for (const n of names) {
-    if (byName[n]) return byName[n];
-    for (const [key, cat] of Object.entries(byName)) {
-      if (n.includes(key)) return cat;
+    if (byName[n]) return byName[n];                  // khớp chính xác
+    for (const key of keysByLength) {                 // khớp mềm: ưu tiên từ khoá dài nhất
+      if (n === key || n.includes(key)) return byName[key];
+    }
+  }
+  if (cfg.categories?.nameFallback !== false) return categoryFromName(raw.name);
+  return null;
+}
+
+function categoryFromName(rawName) {
+  const n = norm(rawName);
+  if (!n) return null;
+  const byName = cfg.categories?.byName || {};
+  const keys = Object.keys(byName).sort((a, b) => b.length - a.length);
+  for (const key of keys) {
+    if (key.includes(" ")) {
+      if (n.includes(key)) return byName[key];
+    } else {
+      const re = new RegExp("(^|\\s)" + key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(\\s|$)");
+      if (re.test(n)) return byName[key];
     }
   }
   return null;
 }
 
-function resolveBrand(raw) {
+function brandFromName(name) {
+  if (cfg.name?.brandFromName === false) return "";
+  const m = String(name || "").match(/^([A-Z0-9][A-Z0-9&.'_-]{2,})(?=\s)/);
+  return m ? m[1] : "";
+}
+
+function resolveBrand(raw, nameBrand) {
   const map = cfg.brands || {};
   if (raw.brand && typeof raw.brand === "object" && raw.brand.name) return raw.brand.name;
   if (raw.brand && typeof raw.brand === "string") return raw.brand;
   if (typeof raw.brand_name === "string" && raw.brand_name) return raw.brand_name;
   if (raw.brand_id && map[String(raw.brand_id)]) return map[String(raw.brand_id)];
+  if (nameBrand) return nameBrand;                     // vd "AOORAA", "ANNATTO", "4MUGGLE"
+  const fromId = brandFromCustomId(raw);
+  if (fromId) return fromId;
   return cfg.brandFallback || "ALMIRA";
+}
+
+function brandFromCustomId(raw) {
+  if (cfg.brandFromCustomId === false) return "";
+  const m = String(raw.custom_id || "").match(/^([A-Za-z]{4,})(?=\d|$)/);
+  if (!m) return "";
+  const token = m[1].toUpperCase();
+  const blocked = new Set((cfg.brandBlocklist || []).map((x) => String(x).toUpperCase()));
+  return blocked.has(token) ? "" : token;
+}
+
+/* Tên sản phẩm Pancake thường rất dài + kèm marketing. Rút gọn để card không vỡ layout. */
+function cleanName(rawName, brandToken) {
+  let s = String(rawName || "").trim();
+  if (cfg.name?.stripBrackets !== false) {
+    s = s.replace(/【[^】]*】/g, " ").replace(/\[[^\]]*\]/g, " ").replace(/（[^）]*）/g, " ").replace(/\([^)]*\)/g, " ");
+  }
+  if (cfg.name?.stripQuoted !== false) {
+    s = s.replace(/["“”„«»]/g, " ");
+  }
+  if (brandToken && s.toUpperCase().startsWith(brandToken.toUpperCase())) {
+    s = s.slice(brandToken.length);
+  }
+  s = s.replace(/\s+/g, " ").replace(/^[\s,.;:–—-]+|[\s,.;:–—-]+$/g, "");
+  const max = Number(cfg.name?.maxLength) || 0;
+  if (max && s.length > max) {
+    s = s.slice(0, max).replace(/\s+\S*$/, "").replace(/[\s,.;:–—-]+$/g, "") + "…";
+  }
+  return s || String(rawName || "").trim();
 }
 
 const PALETTE = ["#E7DFD2", "#1d1a16", "#c9b896", "#9a958e", "#efe6d4", "#7a5c40", "#e3b7c4", "#7d8fa8"];
 
 function colorInfo(name, index) {
   const key = norm(name);
-  const entry = (cfg.colors || {})[key] || (cfg.colors || {})[Object.keys(cfg.colors || {}).find((k) => key.includes(k))];
+  const colors = cfg.colors || {};
+  const keysByLength = Object.keys(colors).sort((a, b) => b.length - a.length);
+  let entry = colors[key];
+  if (entry === undefined) {
+    const hit = keysByLength.find((k) => key.includes(k));
+    if (hit) entry = colors[hit];
+  }
   if (entry && typeof entry === "object" && entry.hex) {
     return [String(name).trim(), entry.hex, entry.en || String(name).trim()];
   }
@@ -201,13 +263,9 @@ function attrMatch(name, kind) {
   return n.includes("size") || n === "kich thuoc" || n === "kich co";
 }
 
-function attributeValues(raw, kind) {
-  const attrs = Array.isArray(raw.product_attributes) ? raw.product_attributes : [];
-  const attr = attrs.find((a) => attrMatch(a.name, kind));
-  if (attr && Array.isArray(attr.values)) {
-    return [...new Set(attr.values.map((v) => String(v).trim()).filter(Boolean))];
-  }
-  // dự phòng: lấy từ fields của variations
+function variantValues(raw, kind) {
+  // Ưu tiên fields của variations: trên Pancake, product_attributes là danh sách
+  // giá trị dùng chung của cả shop (có thể tới 50+ màu), không phải của riêng sản phẩm.
   const out = [];
   for (const v of raw.variations || []) {
     for (const f of v.fields || []) {
@@ -217,7 +275,12 @@ function attributeValues(raw, kind) {
       }
     }
   }
-  return [...new Set(out)];
+  if (out.length) return [...new Set(out)];
+  const attrs = Array.isArray(raw.product_attributes) ? raw.product_attributes : [];
+  const attr = attrs.find((a) => attrMatch(a.name, kind));
+  return attr && Array.isArray(attr.values)
+    ? [...new Set(attr.values.map((v) => String(v).trim()).filter(Boolean))]
+    : [];
 }
 
 function deriveTag(raw, isNew) {
@@ -247,24 +310,36 @@ function mapProduct(raw) {
   const price = prices.length ? Math.min(...prices) : Number(raw.price) || Number(raw.retail_price) || 0;
   if (!price) return { skip: "no-price" };
 
-  const gallery = (raw.images || []).map(normalizeImage).filter(Boolean);
-  const img = over.img || gallery[0] || normalizeImage(raw.image);
+  // Ảnh: Pancake có sản phẩm không có ảnh ở cấp product, ảnh nằm trong từng variation
+  let img = over.img || (raw.images || []).map(normalizeImage).filter(Boolean)[0] || normalizeImage(raw.image);
+  if (!img) {
+    for (const v of variations) {
+      const vi = (v.images || []).map(normalizeImage).filter(Boolean);
+      if (vi.length) { img = vi[0]; break; }
+    }
+  }
   if (!img) return { skip: "no-image" };
 
-  const colorNames = attributeValues(raw, "color");
+  const colorNames = variantValues(raw, "color").slice(0, Number(cfg.maxColors) || 16);
   const colors = colorNames.length
     ? colorNames.map((n, i) => colorInfo(n, i))
     : [["Mặc định", "#E7DFD2", "Default"]];
 
-  const sizes = attributeValues(raw, "size");
+  const rawName = String(raw.name || "").trim();
+  const nameBrand = brandFromName(rawName);
+  const brand = over.brand || resolveBrand(raw, nameBrand);
+  const displayName = over.name || cleanName(rawName, nameBrand) || "Sản phẩm";
+
+  const sizes = variantValues(raw, "size").slice(0, Number(cfg.maxSizes) || 16);
   const inserted = raw.inserted_at ? new Date(raw.inserted_at) : null;
   const isNew = Boolean(inserted && !Number.isNaN(inserted.getTime()) && Date.now() - inserted.getTime() <= (cfg.newDays || 21) * 864e5);
 
+  const desc = over.desc || stripHtml(raw.description || raw.note_product || "") || cfg.descFallback || "";
   const mapped = {
     id: String(raw.id),
-    name: String(raw.name || "").trim() || "Sản phẩm",
-    nameEn: over.nameEn || String(raw.name_en || raw.name || "").trim() || "Product",
-    brand: over.brand || resolveBrand(raw),
+    name: displayName,
+    nameEn: over.nameEn || String(raw.name_en || displayName).trim() || "Product",
+    brand,
     cat,
     price: Math.round(price),
     was: over.was != null ? Math.round(Number(over.was)) || null : null,
@@ -273,8 +348,8 @@ function mapProduct(raw) {
     isNew,
     colors,
     sizes: sizes.length ? sizes : ["Freesize"],
-    desc: over.desc || stripHtml(raw.description || raw.note_product || ""),
-    descEn: over.descEn || stripHtml(raw.description_en || raw.description || raw.note_product || ""),
+    desc,
+    descEn: over.descEn || stripHtml(raw.description_en || raw.description || raw.note_product || "") || cfg.descFallbackEn || desc,
   };
   return { product: mapped };
 }
@@ -321,6 +396,9 @@ async function writeOutputs(products, rawCount) {
 try {
   log(`Pancake POS sync → ${path.relative(ROOT, OUT_PATH)}`);
   const raw = await loadRawProducts();
+  if ((cfg.sortBy || "newest") === "newest") {
+    raw.sort((a, b) => String(b.inserted_at || "").localeCompare(String(a.inserted_at || "")));
+  }
   const products = [];
   const skipped = new Map();
   for (const item of raw) {
