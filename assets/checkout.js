@@ -76,7 +76,7 @@
     el.querySelectorAll('input[name="almPayment"]').forEach(radio => radio.addEventListener("change", () => { state.payment = radio.value; render(); }));
     const back = el.querySelector("#almCoBack"); if (back) back.addEventListener("click", () => { state.step = 1; render({ focus: true }); });
     const copy = el.querySelector("#almCopyAccount"); if (copy && !copy.disabled) copy.addEventListener("click", async () => { try { await navigator.clipboard.writeText(String(window.ALMIRA_PAYMENTS.bank.accountNumber).trim()); el.querySelector("#almCoStatus").textContent = tr("copied"); } catch (_) { el.querySelector("#almCoStatus").textContent = tr("copyFail"); } });
-    if (options && options.focus) { const heading = el.querySelector("#almCheckoutStepHeading"); if (heading) heading.focus({ preventScroll: true }); }
+    if (options && options.focus) { const heading = el.querySelector("#almCheckoutStepHeading"); if (heading) { heading.focus({ preventScroll: true }); heading.scrollIntoView({ block: "start", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" }); } }
   }
   window.AlmiraCheckout = { render, getStep: () => state.step, resetStep: () => { capture(); state.step = 1; state.errors = {}; } };
 })();

@@ -32,6 +32,7 @@ body.route-section #sectionView,body.route-checkout #checkoutView{display:block}
 #menuPanel a[aria-current="page"]{background:rgba(235,208,220,.35)}
 .alm-co-panel{animation:routeSurface .45s var(--ease-lux) both}
 @media(prefers-reduced-motion:reduce){.alm-co-panel{animation:none}}
+#almCheckoutStepHeading{scroll-margin-top:124px}
 .alm-checkout{padding-bottom:48px}
 .alm-co-heading{padding:18px 0 28px}
 .alm-co-kicker{display:block;font-size:10px;line-height:1.6;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
