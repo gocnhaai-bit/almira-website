@@ -1,18 +1,20 @@
-/* Dedicated document views; move sections instead of duplicating IDs or listeners. */
+/* Dedicated views: full sections stay connected but hidden outside the short homepage. */
 (() => {
   const names = ['shop', 'cats', 'how', 'about', 'contact', 'policy'];
+  const storage = document.getElementById('detailStorage');
+  const main = document.querySelector('main');
+  if (!storage || !main) return;
+  main.after(storage);
   const sections = new Map();
   names.forEach(name => {
     const element = document.getElementById(name);
-    const marker = document.createComment('home-section-' + name);
-    element.before(marker);
-    sections.set(name, {element, marker});
+    sections.set(name, {element});
   });
   const shell = document.createElement('div');
   shell.id = 'sectionView'; shell.className = 'view';
   shell.innerHTML = '<div class="wrap"><nav class="crumb" aria-label="Breadcrumb"><a href="#/home" id="sectionHome">Trang chủ</a><span class="sep">/</span><span class="here" id="sectionCrumb"></span></nav><div id="sectionContent"></div></div>';
   document.querySelector('main').after(shell);
-  const restore = () => sections.forEach(({element, marker}) => marker.after(element));
+  const restore = () => sections.forEach(({element}) => storage.append(element));
   window.AlmiraPages = {
     handle(name) {
       restore();
