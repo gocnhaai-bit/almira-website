@@ -1082,6 +1082,7 @@ html.motion-fallback .intro{display:none!important}
 .foot>div,.policy .box,.policy li,.cats .cat,.reveal .perk,.reveal .step,.about-txt p,
 .about-txt .social-row,.split .wi,.brands .brand-chip{opacity:1!important;transform:none!important;clip-path:none!important}
 </style></noscript>
+<link rel="stylesheet" href="assets/checkout.css" />
 </head>
 <body>
 
@@ -1105,7 +1106,7 @@ html.motion-fallback .intro{display:none!important}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
         </button>
       </div>
-      <a class="brand" href="#top" aria-label="Almira Studio — trang chủ">
+      <a class="brand" href="#/home" aria-label="Almira Studio — trang chủ">
         <span class="name"><b>ALMIRA</b> STUDIO</span>
       </a>
       <div class="head-actions">
@@ -1123,12 +1124,12 @@ html.motion-fallback .intro{display:none!important}
       </div>
     </div>
     <nav class="menu-panel" id="menuPanel" aria-label="Menu">
-      <a href="#shop"><span data-i18n="navShop">Cửa hàng</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></a>
+      <a href="#/shop"><span data-i18n="navShop">Cửa hàng</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></a>
       <a href="#/brands"><span data-i18n="navBrands">Thương hiệu</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></a>
-      <a href="#cats"><span data-i18n="navCats">Danh mục</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></a>
-      <a href="#how"><span data-i18n="navHow">Cách đặt order</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></a>
-      <a href="#about"><span data-i18n="navAbout">Về Almira</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></a>
-      <a href="#contact"><span data-i18n="navContact">Liên hệ</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></a>
+      <a href="#/cats"><span data-i18n="navCats">Danh mục</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></a>
+      <a href="#/how"><span data-i18n="navHow">Cách đặt order</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></a>
+      <a href="#/about"><span data-i18n="navAbout">Về Almira</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></a>
+      <a href="#/contact"><span data-i18n="navContact">Liên hệ</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></a>
     </nav>
     <div class="search-row" id="searchRow">
       <input type="search" id="searchInput" data-i18n-ph="searchPh" placeholder="Tìm đầm, áo kiểu, set đồ… (ví dụ: đầm lụa, blazer)" aria-label="Tìm sản phẩm" />
@@ -1170,8 +1171,8 @@ html.motion-fallback .intro{display:none!important}
             <div class="hn-sub" data-i18n="noteSub">Còn lại khi nhận hàng</div>
           </div>
           <div class="hero-btns">
-            <a class="btn btn-gold" href="#shop" data-i18n="btnShop">Mua sắm ngay</a>
-            <a class="btn btn-ghost" href="#how" data-i18n="btnHow">Cách đặt order</a>
+            <a class="btn btn-gold" href="#/shop" data-i18n="btnShop">Mua sắm ngay</a>
+            <a class="btn btn-ghost" href="#/how" data-i18n="btnHow">Cách đặt order</a>
           </div>
         </div>
       </div>
@@ -1237,7 +1238,7 @@ html.motion-fallback .intro{display:none!important}
     <section class="block" id="shop">
       <div class="sec-head">
         <div><h2 data-i18n="shopT">Cửa hàng</h2><p id="shopCount"></p></div>
-        <a class="link" href="#how" data-i18n="shopLink">Quy trình order →</a>
+        <a class="link" href="#/how" data-i18n="shopLink">Quy trình order →</a>
       </div>
       <div class="filters" role="group" aria-label="Lọc sản phẩm">
         <button class="chip on" data-filter="all" data-i18n="fAll">Tất cả</button>
@@ -1353,8 +1354,8 @@ html.motion-fallback .intro{display:none!important}
 <div class="view" id="productView">
   <div class="wrap">
     <nav class="crumb" aria-label="Breadcrumb">
-      <a href="#top" data-i18n="crumbHome">Trang chủ</a><span class="sep">/</span>
-      <a href="#shop" data-i18n="navShop">Cửa hàng</a><span class="sep">/</span>
+      <a href="#/home" data-i18n="crumbHome">Trang chủ</a><span class="sep">/</span>
+      <a href="#/shop" data-i18n="navShop">Cửa hàng</a><span class="sep">/</span>
       <span class="here" id="productCrumb"></span>
     </nav>
     <div class="product-stage">
@@ -1377,10 +1378,10 @@ html.motion-fallback .intro{display:none!important}
         <div class="opt-label">Size</div>
         <div class="sizes" id="pageSizes"></div>
         <div class="err hidden" id="pageErr" data-i18n="pdErr">Vui lòng chọn size trước khi thêm vào giỏ.</div>
-        <div class="pd"><div class="row">
-          <span class="qty"><button id="pageMinus" aria-label="Giảm số lượng">−</button><output id="pageQty">1</output><button id="pagePlus" aria-label="Tăng số lượng">+</button></span>
-          <button class="btn btn-gold" id="pageAdd" style="flex:1;justify-content:center" data-i18n="pdAdd">Thêm vào giỏ</button>
-        </div></div>
+        <div class="product-actions">
+          <span class="qty"><button id="pageMinus" type="button" aria-label="Giảm số lượng">−</button><output id="pageQty">1</output><button id="pagePlus" type="button" aria-label="Tăng số lượng">+</button></span>
+          <button class="btn btn-gold" id="pageAdd" type="button" data-i18n="pdAdd">Thêm vào giỏ</button>
+        </div>
         <button class="btn btn-dark full" id="pageBuy" style="margin-top:10px" data-i18n="pdBuy">Mua ngay</button>
         <p class="note-line" data-i18n="pdNote">Order 7–14 ngày · Cọc 50% · Inbox tư vấn size.</p>
       </div>
@@ -1394,7 +1395,7 @@ html.motion-fallback .intro{display:none!important}
 
 <div class="view" id="brandsView">
   <div class="wrap">
-    <nav class="crumb"><a href="#top" data-i18n="crumbHome">Trang chủ</a><span class="sep">/</span><span class="here" data-i18n="navBrands">Thương hiệu</span></nav>
+    <nav class="crumb"><a href="#/home" data-i18n="crumbHome">Trang chủ</a><span class="sep">/</span><span class="here" data-i18n="navBrands">Thương hiệu</span></nav>
     <div class="sec-head"><div><h2 data-i18n="brandsPageT">Tất cả thương hiệu</h2><p id="brandsCount"></p></div></div>
     <div class="brand-grid" id="brandDirectory"></div>
   </div>
@@ -1402,7 +1403,7 @@ html.motion-fallback .intro{display:none!important}
 
 <div class="view" id="brandView">
   <div class="wrap">
-    <nav class="crumb"><a href="#top" data-i18n="crumbHome">Trang chủ</a><span class="sep">/</span><a href="#/brands" data-i18n="navBrands">Thương hiệu</a><span class="sep">/</span><span class="here" id="brandCrumb"></span></nav>
+    <nav class="crumb"><a href="#/home" data-i18n="crumbHome">Trang chủ</a><span class="sep">/</span><a href="#/brands" data-i18n="navBrands">Thương hiệu</a><span class="sep">/</span><span class="here" id="brandCrumb"></span></nav>
     <div class="sec-head"><div><h2 id="brandTitle"></h2><p id="brandCount"></p></div></div>
     <div class="grid" id="brandGrid"></div>
     <div class="more-wrap hidden" id="brandMoreWrap"><button class="btn btn-ghost" id="brandMoreBtn" type="button"></button></div>
@@ -1419,18 +1420,18 @@ html.motion-fallback .intro{display:none!important}
       </div>
       <div>
         <h4 data-i18n="footShopH">Mua sắm</h4>
-        <a href="#shop" data-i18n="footAll">Tất cả sản phẩm</a>
+        <a href="#/shop" data-i18n="footAll">Tất cả sản phẩm</a>
         <a href="#/brands" data-i18n="navBrands">Thương hiệu</a>
-        <a href="#cats" data-i18n="navCats">Danh mục</a>
-        <a href="#how" data-i18n="navHow">Cách đặt order</a>
-        <a href="#policy" data-i18n="footPolicy">Chính sách đổi trả</a>
+        <a href="#/cats" data-i18n="navCats">Danh mục</a>
+        <a href="#/how" data-i18n="navHow">Cách đặt order</a>
+        <a href="#/policy" data-i18n="footPolicy">Chính sách đổi trả</a>
       </div>
       <div>
         <h4 data-i18n="footChH">Kênh của shop</h4>
         <a href="https://www.instagram.com/almira.studiooo" target="_blank" rel="noopener">Instagram</a>
         <a href="https://www.threads.com/@almira.studiooo" target="_blank" rel="noopener">Threads</a>
         <a href="https://www.facebook.com/almira.studiooo" target="_blank" rel="noopener">Facebook</a>
-        <a href="#contact" data-i18n="navContact">Liên hệ</a>
+        <a href="#/contact" data-i18n="navContact">Liên hệ</a>
       </div>
     </div>
     <div class="copyright">
@@ -1497,49 +1498,7 @@ html.motion-fallback .intro{display:none!important}
   </div>
 </div>
 
-<!-- CHECKOUT MODAL -->
-<div class="modal" id="checkoutModal" role="dialog" aria-modal="true" aria-label="Đặt hàng">
-  <div class="sheet" style="width:min(640px,100vw)">
-    <button class="close" data-close aria-label="Đóng">✕</button>
-    <form class="checkout" id="checkoutForm" novalidate>
-      <h3 data-i18n="coT">Thông tin đặt hàng</h3>
-      <p class="sub" data-i18n="coSub">Almira liên hệ xác nhận &amp; hướng dẫn cọc 50%.</p>
-      <div class="f-grid">
-        <label class="f"><span data-i18n="coName">Họ và tên *</span>
-          <input name="name" required autocomplete="name" placeholder="Nguyễn Thị A" />
-        </label>
-        <label class="f"><span data-i18n="coPhone">Số điện thoại *</span>
-          <input name="phone" required autocomplete="tel" inputmode="tel" placeholder="09xx xxx xxx" />
-        </label>
-        <label class="f wide"><span data-i18n="coAddr">Địa chỉ nhận hàng *</span>
-          <input name="address" required autocomplete="street-address" data-i18n-ph="coAddrPh" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành" />
-        </label>
-        <label class="f"><span data-i18n="coPay">Phương thức thanh toán</span>
-          <select name="payment">
-            <option value="Cọc chuyển khoản 50% + COD phần còn lại" data-i18n="payOpt1">Cọc chuyển khoản 50% + COD phần còn lại</option>
-            <option value="Chuyển khoản 100%" data-i18n="payOpt2">Chuyển khoản 100%</option>
-            <option value="COD toàn bộ (đơn có sẵn)" data-i18n="payOpt3">COD toàn bộ (đơn có sẵn)</option>
-          </select>
-        </label>
-        <label class="f"><span data-i18n="coNoteL">Ghi chú cho shop</span>
-          <input name="note" data-i18n-ph="coNotePh" placeholder="Chiều cao/cân nặng để tư vấn size…" />
-        </label>
-      </div>
-      <div class="order-lines" id="orderLines"></div>
-      <div class="err hidden" id="coErr" data-i18n="coErr">Vui lòng điền đầy đủ họ tên, số điện thoại (ít nhất 9 chữ số) và địa chỉ.</div>
-      <button class="btn btn-gold full" type="submit" data-i18n="coSubmit">Xác nhận đặt hàng</button>
-    </form>
-    <div class="success hidden" id="successBox">
-      <div class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6 9 17l-5-5"/></svg></div>
-      <h3 data-i18n="okT">Đặt hàng thành công!</h3>
-      <p><span data-i18n="okP1">Mã đơn:</span> <code id="orderCode"></code>. <span data-i18n="okP2">Almira sẽ liên hệ xác nhận &amp; hướng dẫn cọc 50%.</span></p>
-      <button class="btn btn-dark" data-close data-i18n="okBtn">Tiếp tục mua sắm</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast" role="status"></div>
-
 <script>
 "use strict";
 /* ================= DATA =================
@@ -10444,7 +10403,11 @@ function pTag(p){ if (!p.tag) return ""; if (lang === "en") return ({ "Bán ch�
 function colorName(p, i){ const c = p.colors[i]; return lang === "en" ? c[2] : c[0]; }
 
 /* ================= STATE (in-memory only) ================= */
-let cart = [];            // {id, size, color, qty}
+let cart = [];            // {id, size, color, qty}; session-only, no buyer details.
+try {
+  const saved = JSON.parse(sessionStorage.getItem("almira-cart") || "[]");
+  if (Array.isArray(saved)) cart = saved.filter(i => i && PRODUCTS.some(p => p.id === i.id && p.sizes.includes(i.size)) && typeof i.color === "string" && Number.isInteger(i.qty) && i.qty > 0 && i.qty <= 9);
+} catch (_) {}
 let activeFilter = "all";
 let shownCount = 24;          // phân trang "Xem thêm"
 const PAGE_SIZE = 24;
@@ -10530,7 +10493,7 @@ $$(".cat[data-cat]").forEach(c => c.addEventListener("click", () => {
   activeFilter = cat;
   shownCount = PAGE_SIZE;
   renderGrid();
-  document.getElementById("shop").scrollIntoView({ behavior:"smooth" });
+  location.hash = "#/shop";
 }));
 /* Dropdown sắp xếp tùy chỉnh — panel kính mờ đồng bộ UI */
 const sortBtn = $("#sortBtn"), sortPanel = $("#sortPanel");
@@ -10576,7 +10539,7 @@ $("#searchInput").addEventListener("input", e => {
     renderGrid();
     if (query && wasEmpty && !searchScrolled && !window.matchMedia("(prefers-reduced-motion: reduce)").matches){
       searchScrolled = true;
-      document.getElementById("shop").scrollIntoView({ behavior:"smooth", block:"start" });
+      if (location.hash !== "#/shop") location.hash = "#/shop";
     }
     if (!query) searchScrolled = false;
   }, 130);
@@ -10648,12 +10611,25 @@ function renderBrandPage(){
   document.title = (activeBrand || t("navBrands")) + " — Almira Studio";
 }
 function showRoute(name){
-  document.body.classList.remove("route-product", "route-brands", "route-brand");
+  [...document.body.classList].filter(c => c.startsWith("route-")).forEach(c => document.body.classList.remove(c));
+  document.body.dataset.page = name || "home";
   if (name) document.body.classList.add("route-" + name);
 }
 function route(){
-  const parts = decodeURI(location.hash || "").replace(/^#\/?/, "").split("/").filter(Boolean);
-  if (parts[0] === "product" && byId(parts[1])){
+  let hash = location.hash || "";
+  try { hash = decodeURI(hash); } catch (_) { hash = "#/home"; }
+  const parts = hash.replace(/^#\/?/, "").split("/").filter(Boolean);
+  $$("#menuPanel a").forEach(a => {
+    if (a.hash === location.hash) a.setAttribute("aria-current", "page");
+    else a.removeAttribute("aria-current");
+  });
+  if (window.AlmiraPages) window.AlmiraPages.handle("");
+  if (parts[0] === "checkout" && window.AlmiraCheckout){
+    showRoute("checkout"); window.AlmiraCheckout.render();
+    document.title = (lang === "en" ? "Checkout" : "Thanh toán") + " — Almira Studio";
+  } else if (window.AlmiraPages && window.AlmiraPages.handle(parts[0])){
+    // Dedicated section page mounted by pages.js.
+  } else if (parts[0] === "product" && byId(parts[1])){
     current = byId(parts[1]);
     selSize = current.sizes.length === 1 ? current.sizes[0] : null;
     selColor = 0; selQty = 1; galleryIndex = 0;
@@ -10668,14 +10644,16 @@ function route(){
     showRoute("");
     document.title = t("docTitle");
   }
-  window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+  if (typeof closeMenu === "function") closeMenu();
+  document.body.style.overflow = "";
+  window.scrollTo({ top: 0, behavior: "instant" });
 }
 $("#galleryPrev").addEventListener("click", () => { galleryIndex--; renderGallery(); });
 $("#galleryNext").addEventListener("click", () => { galleryIndex++; renderGallery(); });
 $("#pageMinus").addEventListener("click", () => { selQty = Math.max(1, selQty - 1); $("#pageQty").textContent = selQty; });
 $("#pagePlus").addEventListener("click", () => { selQty = Math.min(9, selQty + 1); $("#pageQty").textContent = selQty; });
 $("#pageAdd").addEventListener("click", () => { if (addCurrentToCart()) flyToCart($("#galleryImg")); });
-$("#pageBuy").addEventListener("click", () => { if (addCurrentToCart()) openCart(); });
+$("#pageBuy").addEventListener("click", () => { if (addCurrentToCart()){ window.AlmiraCheckout?.resetStep(); location.hash = "#/checkout"; } });
 $("#brandMoreBtn").addEventListener("click", () => { brandShown += PAGE_SIZE; renderBrandPage(); });
 let touchX = 0;
 $("#galleryImg").addEventListener("touchstart", e => { touchX = e.changedTouches[0].clientX; }, { passive: true });
@@ -10703,7 +10681,7 @@ function refreshPdText(){
 $("#pdMinus").addEventListener("click", () => { selQty = Math.max(1, selQty-1); $("#pdQty").textContent = selQty; });
 $("#pdPlus").addEventListener("click", () => { selQty = Math.min(9, selQty+1); $("#pdQty").textContent = selQty; });
 function addCurrentToCart(){
-  if (!selSize){ $("#pdErr").classList.remove("hidden"); return false; }
+  if (!selSize){ $("#pageErr").classList.remove("hidden"); $("#pageSizes .size-btn")?.focus(); return false; }
   const color = colorName(current, selColor);
   const found = cart.find(i => i.id === current.id && i.size === selSize && i.color === color);
   if (found) found.qty = Math.min(9, found.qty + selQty);
@@ -10719,6 +10697,8 @@ $("#pdBuy").addEventListener("click", () => {});
 function cartCount(){ return cart.reduce((s,i)=>s+i.qty,0); }
 function cartTotal(){ return cart.reduce((s,i)=>s + byId(i.id).price * i.qty, 0); }
 function renderCart(){
+  try { sessionStorage.setItem("almira-cart", JSON.stringify(cart)); } catch (_) {}
+  if (document.body.dataset.page === "checkout") window.AlmiraCheckout?.render();
   const n = cartCount(), total = cartTotal();
   const badge = $("#cartCount");
   badge.textContent = n; badge.classList.toggle("hidden", n === 0);
@@ -10770,30 +10750,8 @@ document.addEventListener("keydown", e => {
 $("#checkoutBtn").addEventListener("click", () => {
   if (!cart.length) return;
   closeCart();
-  $("#checkoutForm").classList.remove("hidden");
-  $("#successBox").classList.add("hidden");
-  $("#coErr").classList.add("hidden");
-  const total = cartTotal();
-  $("#orderLines").innerHTML =
-    cart.map(i => { const p = byId(i.id); return `<div class="r"><span>${t("coLine", { name: pName(p), size: i.size, color: i.color, qty: i.qty })}</span><b>${fmt(p.price*i.qty)}</b></div>`; }).join("") +
-    `<div class="r" style="border-top:1px solid var(--line);margin-top:6px;padding-top:10px"><span>${t("orderTotal")}</span><b>${fmt(total)}</b></div>
-     <div class="r"><span>${t("orderDeposit")}</span><b>${fmt(Math.round(total/2))}</b></div>
-     <div class="r"><span>${t("orderRest")}</span><b>${fmt(total - Math.round(total/2))}</b></div>`;
-  $("#checkoutModal").classList.add("on");
-  document.body.style.overflow = "hidden";
-});
-$("#checkoutForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  const name = (fd.get("name")||"").toString().trim();
-  const phone = (fd.get("phone")||"").toString().replace(/\D/g,"");
-  const address = (fd.get("address")||"").toString().trim();
-  if (!name || phone.length < 9 || !address){ $("#coErr").classList.remove("hidden"); return; }
-  const code = "ALM" + Date.now().toString().slice(-6);
-  $("#orderCode").textContent = code;
-  $("#checkoutForm").classList.add("hidden");
-  $("#successBox").classList.remove("hidden");
-  cart = []; renderCart();
+  window.AlmiraCheckout?.resetStep();
+  location.hash = "#/checkout";
 });
 
 /* ================= SCROLL FX (chỉ back-to-top — topbar giữ nguyên, không biến hình) ================= */
@@ -10830,6 +10788,8 @@ function applyLang(l){
   renderGrid();
   renderCart();
   refreshPdText();
+  window.AlmiraPages?.refresh();
+  if (document.body.dataset.page === "checkout") window.AlmiraCheckout?.render();
 }
 $("#langVi").addEventListener("click", () => { if (lang !== "vi") applyLang("vi"); });
 $("#langEn").addEventListener("click", () => { if (lang !== "en") applyLang("en"); });
@@ -11251,5 +11211,8 @@ $("#moreBtn").addEventListener("click", () => {
 
 
 </script>
+<script src="assets/payment-config.js"></script>
+<script src="assets/checkout.js"></script>
+<script src="assets/pages.js"></script>
 </body>
 </html>

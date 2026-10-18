@@ -4,21 +4,25 @@ Website bán hàng thời trang nữ order cao cấp cho **Almirastudio.vn** (so
 
 ## Triển khai
 
-Đây là website tĩnh trong **một file duy nhất** (`index.html`, đã nhúng toàn bộ CSS/JS/hình ảnh).
+Website tĩnh: trang chính `index.html` và các module trong `assets/` (routing trang riêng, checkout, cấu hình thanh toán).
 
 - **GitHub Pages:** vào repo Settings → Pages → Deploy from a branch → chọn branch `main`, thư mục `/ (root)` → trang sẽ chạy tại `https://gocnhaai-bit.github.io/almira-website/`
-- **Hosting riêng / domain almirastudio.vn:** upload file `index.html` lên thư mục public của hosting và trỏ domain về.
+- **Hosting riêng / domain almirastudio.vn:** upload `index.html` **và toàn bộ thư mục `assets/`**, cùng các tài nguyên hiện có. Không chỉ upload mỗi HTML.
 
 ## Tính năng
 
 - Trang chủ, cửa hàng (lọc/tìm kiếm/sắp xếp), chi tiết sản phẩm (chọn size/màu)
-- Giỏ hàng, form đặt hàng sinh mã đơn (lưu local, shop xác nhận thủ công)
+- Trang riêng qua hash routes tương thích GitHub Pages: `#/shop`, `#/brands`, `#/cats`, `#/how`, `#/about`, `#/contact`, `#/policy`, `#/product/<id>`, `#/checkout`. Back/forward và tải lại URL hoạt động, không cần rewrite server.
+- Giỏ hàng lưu trong sessionStorage để không mất khi tải lại trong cùng tab; thông tin người nhận chỉ giữ trong bộ nhớ.
+- Checkout hai bước: thông tin giao hàng → chọn MB Bank hoặc PayPal, có kiểm tra trường bắt buộc và tóm tắt cọc 50%.
+- **Chưa có backend gửi đơn/xác minh thanh toán.** Không sinh trạng thái đặt hàng/thanh toán thành công giả, không tự xóa giỏ. Khách liên hệ shop để chốt đơn.
+- Nhập thông tin đích nhận tiền công khai trong `assets/payment-config.js`: `bank.accountNumber`, `bank.beneficiary`, `paypal.url` (HTTPS trên paypal.com hoặc paypal.me). Không nhập API secret. Khi trống, CTA tương ứng bị khóa và thông báo rõ chưa cấu hình. PayPal là liên kết ngoài, chưa tự truyền số tiền hay đối soát webhook.
 - Song ngữ Việt/Anh, giao diện glassmorphism minimal luxury
 - Kênh liên hệ: Instagram, Threads, Facebook
 
 ## Hiệu ứng chuyển động (motion layer)
 
-Toàn bộ vẫn nằm trong một file `index.html`. Motion được thiết kế theo hướng **quiet luxury**: chậm, dứt khoát, không nảy/bounce, chỉ dùng `transform` – `opacity` – `clip-path` để giữ 60fps.
+Motion chính nằm trong `index.html`, chuyển trang/checkout bổ sung tại `assets/checkout.css`. Motion được thiết kế theo hướng **quiet luxury**: chậm, dứt khoát, không nảy/bounce, chỉ dùng `transform` – `opacity` – `clip-path` để giữ 60fps.
 
 - **Mở màn**: tấm màn the nhẹ (blush/glass) ~0,6s rồi kéo lên, hero đã chạy sẵn phía sau. Chỉ hiện ở lần truy cập đầu trong phiên (`sessionStorage: almira-intro`), tự bỏ qua với người dùng giảm chuyển động.
 - **Hero**: 3 dòng tiêu đề trượt lên từ mặt nạ, các khối nội dung hiện theo nhịp; panel kính nghiêng nhẹ theo con trỏ + vệt sáng; ảnh đá marble trôi chậm (Ken Burns); nút CTA hút nhẹ theo chuột.
