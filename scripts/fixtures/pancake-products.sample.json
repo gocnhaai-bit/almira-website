@@ -1,0 +1,92 @@
+{
+  "_comment": "Dữ liệu mẫu theo đúng schema Pancake POS (GET /shops/<shop_id>/products). Dùng để test pipeline khi chưa có API key: node scripts/pancake-sync.mjs --mock scripts/fixtures/pancake-products.sample.json --out /tmp/test-index.html",
+  "data": [
+    {
+      "id": "11111111-1111-1111-1111-111111111111",
+      "name": "Đầm lụa cổ đổ xẻ tà (Pancake demo)",
+      "custom_id": "DAM-PK-01",
+      "display_id": 1,
+      "is_published": true,
+      "is_hidden": false,
+      "image": null,
+      "images": ["https://picsum.photos/seed/almira-dam/600/800"],
+      "description": "<p>Đầm lụa <b>satin</b> dáng dài, cổ đổ, xẻ tà.</p>",
+      "brand_id": "brand-callmelater",
+      "category_ids": [101],
+      "categories": [{ "id": 101, "name": "Đầm" }],
+      "tags": [{ "id": 1, "name": "Bán chạy" }],
+      "product_attributes": [
+        { "id": "attr-color", "name": "Màu sắc", "values": ["Kem ngà", "Đen"] },
+        { "id": "attr-size", "name": "Size", "values": ["S", "M", "L"] }
+      ],
+      "variations": [
+        { "id": "v1", "retail_price": 2990000, "is_hidden": false, "fields": [{ "name": "Màu sắc", "value": "Kem ngà" }, { "name": "Size", "value": "S" }] },
+        { "id": "v2", "retail_price": 2890000, "is_hidden": false, "fields": [{ "name": "Màu sắc", "value": "Đen" }, { "name": "Size", "value": "M" }] },
+        { "id": "v3", "retail_price": 1, "is_hidden": true, "fields": [] }
+      ],
+      "inserted_at": "2026-09-20T08:00:00"
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222222",
+      "name": "Áo len gân cổ 3 phân (Pancake demo)",
+      "custom_id": "AO-PK-02",
+      "is_published": true,
+      "is_hidden": false,
+      "images": ["https://picsum.photos/seed/almira-ao/600/800"],
+      "description": "Áo len gân pha lụa & cashmere, cổ 3 phân.",
+      "brand_id": "brand-oakmoo",
+      "category_ids": [102],
+      "categories": [{ "id": 102, "name": "Áo kiểu" }],
+      "tags": [],
+      "product_attributes": [
+        { "name": "Màu", "values": ["Be", "Xám"] },
+        { "name": "Size", "values": ["S", "M"] }
+      ],
+      "variations": [
+        { "id": "v4", "retail_price": 1290000, "is_hidden": false, "fields": [{ "name": "Màu", "value": "Be" }] }
+      ],
+      "inserted_at": "2025-01-10T08:00:00"
+    },
+    {
+      "id": "33333333-3333-3333-3333-333333333333",
+      "name": "Túi xách tay da form hộp (Pancake demo)",
+      "custom_id": "PK-PK-03",
+      "is_published": true,
+      "is_hidden": false,
+      "images": ["https://picsum.photos/seed/almira-tui/600/800"],
+      "description": "Túi da form hộp, kèm dây đeo chéo.",
+      "brand_id": null,
+      "category_ids": [106],
+      "categories": [{ "id": 106, "name": "Phụ kiện" }],
+      "tags": [{ "id": 2, "name": "Sale" }],
+      "product_attributes": [{ "name": "Màu", "values": ["Nâu", "Be"] }],
+      "variations": [{ "id": "v5", "retail_price": 1690000, "is_hidden": false, "fields": [{ "name": "Màu", "value": "Nâu" }] }],
+      "inserted_at": "2025-06-01T08:00:00"
+    },
+    {
+      "id": "44444444-4444-4444-4444-444444444444",
+      "name": "Sản phẩm đang ẩn (phải bị bỏ qua)",
+      "is_published": true,
+      "is_hidden": true,
+      "images": ["https://picsum.photos/seed/hidden/600/800"],
+      "categories": [{ "id": 101, "name": "Đầm" }],
+      "variations": [{ "id": "v6", "retail_price": 999000, "is_hidden": false }],
+      "inserted_at": "2025-06-01T08:00:00"
+    },
+    {
+      "id": "55555555-5555-5555-5555-555555555555",
+      "name": "Sản phẩm danh mục chưa map (phải bị bỏ qua)",
+      "is_published": true,
+      "is_hidden": false,
+      "images": ["https://picsum.photos/seed/unmapped/600/800"],
+      "categories": [{ "id": 999, "name": "Đồ lót" }],
+      "variations": [{ "id": "v7", "retail_price": 299000, "is_hidden": false }],
+      "inserted_at": "2025-06-01T08:00:00"
+    }
+  ],
+  "page_number": 1,
+  "page_size": 100,
+  "total_entries": 5,
+  "total_pages": 1,
+  "success": true
+}

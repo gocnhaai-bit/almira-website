@@ -1,0 +1,60 @@
+{
+  "_comment": "Cấu hình đồng bộ Pancake POS. Sửa file này khi cần map danh mục / brand / màu / nhãn. Xem README mục 'Kết nối Pancake POS'.",
+  "baseUrl": "https://pos.pages.fm/api/v1",
+  "pageSize": 100,
+  "newDays": 21,
+  "autoNewTag": true,
+  "brandFallback": "ALMIRA",
+  "categories": {
+    "byId": {},
+    "byName": {
+      "dam": "dam",
+      "dress": "dam",
+      "vay": "dam",
+      "ao": "ao",
+      "top": "ao",
+      "blouse": "ao",
+      "shirt": "ao",
+      "so mi": "ao",
+      "set": "set",
+      "bo": "set",
+      "khoac": "khoac",
+      "outerwear": "khoac",
+      "blazer": "khoac",
+      "jacket": "khoac",
+      "quan": "quan",
+      "trouser": "quan",
+      "pants": "quan",
+      "phu kien": "phukien",
+      "accessory": "phukien",
+      "tui": "phukien",
+      "bag": "phukien"
+    }
+  },
+  "brands": {},
+  "colors": {
+    "den": { "hex": "#1d1a16", "en": "Black" },
+    "trang": { "hex": "#f1ead9", "en": "Ivory white" },
+    "trang nga": { "hex": "#f1ead9", "en": "Ivory white" },
+    "kem": { "hex": "#efe6d4", "en": "Cream" },
+    "kem nga": { "hex": "#E7DFD2", "en": "Ivory cream" },
+    "be": { "hex": "#d9c3a3", "en": "Beige" },
+    "nau": { "hex": "#7a5c40", "en": "Brown" },
+    "xam": { "hex": "#9a958e", "en": "Grey" },
+    "xanh": { "hex": "#7d8f7a", "en": "Green" },
+    "xanh la": { "hex": "#7d8f7a", "en": "Green" },
+    "xanh duong": { "hex": "#7d8fa8", "en": "Blue" },
+    "hong": { "hex": "#e3b7c4", "en": "Pink" },
+    "do": { "hex": "#a63a2b", "en": "Red" },
+    "vang": { "hex": "#c9a96a", "en": "Gold" },
+    "bac": { "hex": "#c9c9ce", "en": "Silver" }
+  },
+  "tags": {
+    "Bán chạy": ["ban chay", "best", "hot", "best seller"],
+    "Sale": ["sale", "giam gia", "khuyen mai", "discount"],
+    "Mới": ["moi", "new", "new arrival", "hang moi"]
+  },
+  "overrides": {
+    "_comment": "Map theo id sản phẩm Pancake (hoặc custom_id). Ví dụ: { \"<product-id>\": { \"cat\": \"dam\", \"brand\": \"OAKMOO\", \"nameEn\": \"...\", \"was\": 3290000, \"tag\": \"Sale\" } }"
+  }
+}

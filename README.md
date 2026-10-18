@@ -28,3 +28,61 @@ Toàn bộ vẫn nằm trong một file `index.html`. Motion được thiết k�
 - **A11y**: tôn trọng `prefers-reduced-motion: reduce` (tắt toàn bộ chuyển động, nội dung hiện ngay), `:focus-visible` rõ nét, focus trap trong drawer/modal, mọi nội dung vẫn hiển thị khi JS lỗi hoặc bị tắt.
 
 Tinh chỉnh nhanh: các token nằm ở `:root` trong khối `PREMIUM MOTION LAYER` (cuối `<style>`) — `--ease-lux`, `--ease-soft`, `--ease-inout`, `--dur-1…4`, `--rise`, `--stagger`. Toàn bộ logic điều phối nằm ở khối `PREMIUM MOTION LAYER` cuối `<script>`.
+
+## Kết nối dữ liệu thật từ Pancake POS
+
+Website là file tĩnh trên GitHub Pages nên **không gọi API Pancake trực tiếp từ trình duyệt** (sẽ lộ API key — key này truy cập được cả đơn hàng/khách hàng — và Pancake không mở CORS cho domain lạ). Thay vào đó, dữ liệu được đồng bộ định kỳ vào chính `index.html` bằng GitHub Actions:
+
+```
+Pancake POS API  ──►  scripts/pancake-sync.mjs  ──►  index.html (const PRODUCTS)
+(GET /shops/<id>/products)      (GitHub Actions, cron 30 phút)      ──►  GitHub Pages tự deploy
+```
+
+- API key chỉ nằm trong **GitHub Secrets**, không xuất hiện trong file public.
+- Nếu API lỗi / không có sản phẩm hợp lệ, script thoát lỗi và **không ghi đè** — website cũ vẫn nguyên.
+- Snapshot dữ liệu lần sync gần nhất nằm ở `data/pancake-products.json` để dễ đối chiếu.
+
+### Cài đặt (3 bước)
+
+1. **Tạo API key**: Pancake POS → **Cấu hình → Cấu hình ứng dụng → API KEY → Thêm mới**. Nên tạo key riêng cho website để có thể thu hồi bất cứ lúc nào.
+2. **Lấy SHOP_ID**: xem trong URL/Thông tin shop của Pancake POS, hoặc kiểm tra bằng lệnh:
+   ```bash
+   curl "https://pos.pages.fm/api/v1/shops/<SHOP_ID>/products?api_key=<API_KEY>&page_size=1"
+   ```
+   Kết quả có `"success": true` là đúng.
+3. **Thêm secrets**: repo GitHub → **Settings → Secrets and variables → Actions → New repository secret**
+   - `PANCAKE_SHOP_ID`
+   - `PANCAKE_API_KEY`
+
+   Sau đó vào **Actions → “Sync Pancake POS products” → Run workflow**. Lần chạy đầu tiên sẽ thay dữ liệu mẫu bằng sản phẩm thật, commit và Pages tự cập nhật.
+
+### Map dữ liệu
+
+Sửa `scripts/pancake.config.json`:
+
+| Site | Nguồn Pancake |
+|---|---|
+| `name` / mô tả | `product.name`, `product.description` (đã strip HTML) |
+| `cat` | `categories[].name` → map sang `dam/ao/set/khoac/quan/phukien` (`categories.byName` hoặc `byId`) |
+| `brand` | `brand_id` → `brands` (map ID → tên); mặc định `brandFallback` |
+| `price` | giá thấp nhất trong `variations[].retail_price` (bỏ variation ẩn) |
+| `sizes` / `colors` | `product_attributes` (thuộc tính “Size”, “Màu/Color”) |
+| `img` | `images[0]` (dùng trực tiếp CDN Pancake, không nhúng base64) |
+| `tag` / `isNew` | `tags[]` theo `tags` keywords; `inserted_at` trong `newDays` ngày |
+| `was` (giá gạch), `nameEn`, `descEn`, `tag` tuỳ chỉnh | `overrides["<product-id>"]` |
+
+- Sản phẩm **ẩn/chưa publish** hoặc **danh mục chưa map** sẽ bị bỏ qua (log hiện trong Actions).
+- Muốn thêm danh mục mới: map về 1 trong 6 danh mục đang có để khớp bộ lọc UI; nếu cần danh mục mới hoàn toàn thì phải bổ sung chip lọc trong `index.html`.
+- Ảnh lỗi tải (CDN xoá ảnh) sẽ hiển thị placeholder chữ ALMIRA thay vì ảnh vỡ.
+
+### Chạy thử không cần API key
+
+```bash
+node scripts/pancake-sync.mjs --mock scripts/fixtures/pancake-products.sample.json --out /tmp/test-index.html
+```
+
+### Tuỳ chọn nâng cao
+
+- **Gần thời gian thực hơn**: dùng Pancake webhook → một relay nhỏ (Cloudflare Worker) → gọi `repository_dispatch` để chạy sync ngay, hoặc Worker cache + proxy API cho website (API key vẫn giữ kín).
+- **Đẩy đơn hàng vào Pancake POS**: cần backend/proxy (Cloudflare Worker, Vercel) gọi `POST /shops/<SHOP_ID>/orders`; không thể gọi từ trình duyệt vì lộ API key.
+- **Chỉnh tần suất sync**: sửa `cron` trong `.github/workflows/sync-pancake.yml` (mặc định 30 phút/lần).
