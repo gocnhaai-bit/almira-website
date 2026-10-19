@@ -2,7 +2,7 @@
 
 ## Nguồn cấu hình
 
-[wrangler.jsonc](../wrangler.jsonc) là cấu hình runtime; [package.json](../package.json) là danh sách lệnh; [migrations](../migrations/) sở hữu schema. Production dùng D1 riêng và route apex `almirastudio.vn/*`; local và staging tách binding. ID staging vẫn là placeholder, chưa tạo tài nguyên staging. Catalog production được phép đọc Pancake; checkout và ghi đơn vẫn tắt. Preview và Workers Builds tự deploy chưa bật.
+[wrangler.jsonc](../wrangler.jsonc) là cấu hình runtime; [package.json](../package.json) là danh sách lệnh; [migrations](../migrations/) sở hữu schema. Production dùng D1 riêng và route apex `almirastudio.vn/*`; local và staging tách binding. ID staging vẫn là placeholder, chưa tạo tài nguyên staging. Catalog production được phép đọc Pancake; checkout và ghi đơn được chủ shop duyệt mở ngày 2026-10-19; kiểm chứng riêng vẫn tắt. Preview và Workers Builds tự deploy chưa bật.
 
 Chọn D1 outbox + Cron thay Queues vì lượng đơn ban đầu chưa chứng minh cần thêm dịch vụ. Đơn được thử chuyển sau khi lưu; Cron phục hồi công việc còn chờ. Đổi lại, công việc gián đoạn có thể chờ lượt chạy tiếp theo. Không có giao dịch atomic chung giữa D1 và Pancake.
 
@@ -81,7 +81,7 @@ Sếp tự chọn hàng và xác nhận quote; nhân sự không tạo đơn tha
 
 Dữ liệu nhận hàng chỉ dùng xử lý yêu cầu và đối chiếu đơn. Không dùng cho marketing trong phạm vi này. Người có quyền: nhân sự shop được cấp quyền quản trị; không có endpoint public đọc PII. Status token là bí mật của khách, không chứa PII và không nằm trong URL.
 
-Đề xuất giữ PII Website tối đa 30 ngày sau khi xác nhận synced, sau đó purge qua thao tác quản trị; đơn pending/unknown/manual phải đối chiếu trước khi xóa để tránh mất thông tin xử lý. Đây là **đề xuất cần Sếp duyệt trước production**, chưa phải lịch xóa tự động đã bật. Shop cần xác định trách nhiệm yêu cầu xóa, dữ liệu kế toán phải giữ, phạm vi dữ liệu Pancake và thời gian hết hạn backup. Backup có PII phải được bảo vệ và xóa theo chính sách; purge Website không xóa Pancake/backup cũ.
+Đề xuất giữ PII Website tối đa 30 ngày sau khi xác nhận synced, sau đó purge qua thao tác quản trị; đơn pending/unknown/manual phải đối chiếu trước khi xóa để tránh mất thông tin xử lý. Chủ shop đã duyệt mở nhận đơn ngày 2026-10-19 sau khi chính sách này được trình; thực hiện purge bằng công cụ quản trị, chưa có lịch xóa tự động đã bật. Shop cần xác định trách nhiệm yêu cầu xóa, dữ liệu kế toán phải giữ, phạm vi dữ liệu Pancake và thời gian hết hạn backup. Backup có PII phải được bảo vệ và xóa theo chính sách; purge Website không xóa Pancake/backup cũ.
 
 ## Staging và production: checklist xin duyệt riêng
 

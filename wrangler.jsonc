@@ -15,7 +15,7 @@
       "routes": [{ "pattern": "almirastudio.vn/*", "zone_id": "115c065287dc9207fb67a2a054bc536b" }],
       "workers_dev": true,
       "preview_urls": false,
-      "vars": { "ENVIRONMENT": "production", "CHECKOUT_ENABLED": "false", "CHECKOUT_TRIAL_ENABLED": "false", "PANCAKE_READ_ENABLED": "true", "PANCAKE_WRITE_ENABLED": "false", "CATALOG_MAX_AGE_SECONDS": "3600", "PANCAKE_SHOP_ID": "1720091522", "PANCAKE_WAREHOUSE_ID": "135bd3e0-49e4-4e6a-90b9-1f35075e1d69" },
+      "vars": { "ENVIRONMENT": "production", "CHECKOUT_ENABLED": "true", "CHECKOUT_TRIAL_ENABLED": "false", "PANCAKE_READ_ENABLED": "true", "PANCAKE_WRITE_ENABLED": "true", "CATALOG_MAX_AGE_SECONDS": "3600", "PANCAKE_SHOP_ID": "1720091522", "PANCAKE_WAREHOUSE_ID": "135bd3e0-49e4-4e6a-90b9-1f35075e1d69" },
       "d1_databases": [{ "binding": "DB", "database_name": "almira-production", "database_id": "9893a104-a9a8-4451-a5ac-092d7ab70128", "migrations_dir": "migrations" }],
       "triggers": { "crons": ["* * * * *"] }
     },
