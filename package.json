@@ -1,0 +1,26 @@
+{
+  "name": "almira-website",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "npm run build && wrangler dev --local",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run && node tests/catalog-bootstrap.mjs",
+    "check": "npm run typecheck && npm test && npm run build",
+    "db:backup": "node scripts/local-database.mjs backup",
+    "db:migrate": "node scripts/local-database.mjs migrate",
+    "deploy:check": "npm run build && wrangler deploy --env staging --dry-run"
+  },
+  "dependencies": {
+    "decimal.js": "10.6.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.4.4",
+    "@cloudflare/workers-types": "5.20261019.1",
+    "typescript": "7.0.2",
+    "vitest": "4.1.11",
+    "wrangler": "4.151.1"
+  }
+}

@@ -1,51 +1,21 @@
-name: Sync Pancake POS products
+name: Validate website
 
 on:
-  schedule:
-    # Đồng bộ 30 phút/lần (giờ UTC). Đổi tần suất tại đây.
-    - cron: "*/30 * * * *"
+  push:
+  pull_request:
   workflow_dispatch:
-  repository_dispatch:
-    types: [pancake-update]
 
 permissions:
-  contents: write
-
-concurrency:
-  group: pancake-sync
-  cancel-in-progress: true
+  contents: read
 
 jobs:
-  sync:
+  check:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-
-      - name: Sync products from Pancake POS
-        env:
-          PANCAKE_SHOP_ID: ${{ secrets.PANCAKE_SHOP_ID }}
-          PANCAKE_API_KEY: ${{ secrets.PANCAKE_API_KEY }}
-        run: |
-          if [ -z "$PANCAKE_API_KEY" ] || [ -z "$PANCAKE_SHOP_ID" ]; then
-            echo "::notice::Chưa cấu hình PANCAKE_API_KEY / PANCAKE_SHOP_ID — bỏ qua lần sync này. Xem README mục 'Kết nối Pancake POS'."
-            exit 0
-          fi
-          node scripts/pancake-sync.mjs
-
-      - name: Commit & push nếu dữ liệu thay đổi
-        run: |
-          if git diff --quiet -- index.html data/pancake-products.json; then
-            echo "Không có thay đổi sản phẩm."
-            exit 0
-          fi
-          git config user.name "almira-sync-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add -- index.html data/pancake-products.json
-          git commit -m "chore(pancake): đồng bộ sản phẩm từ Pancake POS [skip ci]"
-          git push
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run check

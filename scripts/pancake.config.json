@@ -1,5 +1,5 @@
 {
-  "_comment": "Cấu hình đồng bộ Pancake POS. Sửa file này khi cần map danh mục / brand / màu / nhãn. Xem README mục 'Kết nối Pancake POS'.",
+  "_comment": "Mapping catalog phía Worker. Xem docs/operations.md; không public file cấu hình này.",
   "baseUrl": "https://pos.pages.fm/api/v1",
   "pageSize": 100,
   "newDays": 21,

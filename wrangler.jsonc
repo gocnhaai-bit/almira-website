@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "almira-local",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": { "directory": "./dist", "binding": "ASSETS", "run_worker_first": ["/api/*"] },
+  "vars": { "ENVIRONMENT": "local", "CHECKOUT_ENABLED": "false", "PANCAKE_READ_ENABLED": "false", "PANCAKE_WRITE_ENABLED": "false", "CATALOG_MAX_AGE_SECONDS": "3600" },
+  "d1_databases": [{ "binding": "DB", "database_name": "almira-local", "database_id": "00000000-0000-0000-0000-000000000001", "migrations_dir": "migrations" }],
+  "triggers": { "crons": ["* * * * *"] },
+  "env": {
+    "staging": {
+      "name": "almira-staging",
+      "workers_dev": false,
+      "preview_urls": false,
+      "vars": { "ENVIRONMENT": "staging", "CHECKOUT_ENABLED": "false", "PANCAKE_READ_ENABLED": "false", "PANCAKE_WRITE_ENABLED": "false", "CATALOG_MAX_AGE_SECONDS": "3600" },
+      "d1_databases": [{ "binding": "DB", "database_name": "almira-staging", "database_id": "00000000-0000-0000-0000-000000000002", "migrations_dir": "migrations" }],
+      "triggers": { "crons": ["* * * * *"] }
+    }
+  }
+}

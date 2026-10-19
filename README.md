@@ -1,121 +1,33 @@
-# Almira.Studiooo — Website
+# Almira Studio — Website
 
-Website bán hàng thời trang nữ order cao cấp cho **Almirastudio.vn** (song ngữ Việt/Anh).
+Website thời trang song ngữ Việt/Anh, giữ frontend HTML/CSS/JavaScript hiện hữu và bổ sung Cloudflare Workers + D1 cho catalog và yêu cầu đặt hàng.
 
-## Triển khai
+## Bắt đầu
 
-Website tĩnh: trang chính `index.html` và các module trong `assets/` (routing trang riêng, checkout, cấu hình thanh toán).
+- Yêu cầu và giới hạn nghiệp vụ: [docs/prompt-1.md](docs/prompt-1.md).
+- Local, staging, bảo mật, quản trị lỗi, backup/rollback và gate production: [docs/operations.md](docs/operations.md).
+- Lệnh thực thi: [package.json](package.json); tài nguyên và các cờ bật/tắt: [wrangler.jsonc](wrangler.jsonc).
+- Static output được allowlist trong [scripts/build.mjs](scripts/build.mjs); không deploy repo root.
 
-- **GitHub Pages:** vào repo Settings → Pages → Deploy from a branch → chọn branch `main`, thư mục `/ (root)` → trang sẽ chạy tại `https://gocnhaai-bit.github.io/almira-website/`
-- **Hosting riêng / domain almirastudio.vn:** upload `index.html` **và toàn bộ thư mục `assets/`**, cùng các tài nguyên hiện có. Không chỉ upload mỗi HTML.
-
-## Tính năng
-
-- Trang chủ, cửa hàng (lọc/tìm kiếm/sắp xếp), chi tiết sản phẩm (chọn size/màu)
-- Trang riêng qua hash routes tương thích GitHub Pages: `#/shop`, `#/brands`, `#/cats`, `#/how`, `#/about`, `#/contact`, `#/policy`, `#/product/<id>`, `#/checkout`. Back/forward và tải lại URL hoạt động, không cần rewrite server.
-- Giỏ hàng lưu trong sessionStorage để không mất khi tải lại trong cùng tab; thông tin người nhận chỉ giữ trong bộ nhớ.
-- Checkout hai bước: thông tin giao hàng → chọn MB Bank hoặc PayPal, có kiểm tra trường bắt buộc và tóm tắt cọc 50%.
-- **Chưa có backend gửi đơn/xác minh thanh toán.** Không sinh trạng thái đặt hàng/thanh toán thành công giả, không tự xóa giỏ. Khách liên hệ shop để chốt đơn.
-- Nhập thông tin đích nhận tiền công khai trong `assets/payment-config.js`: `bank.accountNumber`, `bank.beneficiary`, `paypal.url` (HTTPS trên paypal.com hoặc paypal.me). Không nhập API secret. Khi trống, CTA tương ứng bị khóa và thông báo rõ chưa cấu hình. PayPal là liên kết ngoài, chưa tự truyền số tiền hay đối soát webhook.
-- Song ngữ Việt/Anh, giao diện glassmorphism minimal luxury
-- Kênh liên hệ: Instagram, Threads, Facebook
-
-## Trang chủ tinh gọn
-
-- `assets/home.js` và `assets/home.css`: hero biên tập với ảnh catalog thật, bốn thiết kế tuyển chọn và ba lối dẫn ngắn đến thương hiệu/danh mục/cách order. Không đặt toàn bộ catalog, bộ lọc, hướng dẫn dài, giới thiệu hay chính sách trên trang chủ.
-- Danh sách tuyển chọn dùng product ID ổn định, lấy tên/giá từ catalog hiện tại. Nếu mẫu không còn trong catalog, tự thay bằng sản phẩm cùng danh mục và dùng ảnh đúng mẫu mới.
-- `assets/pages.js` giữ các section chi tiết trong `#detailStorage` có thuộc tính `hidden`, ngoài `main`; chỉ chuyển section được chọn vào trang riêng. DOM ID và listener cũ được giữ nguyên, không nhân bản nội dung.
-- Tìm kiếm từ header mở `#/shop` kể cả khi người dùng bật reduced-motion. Footer trang chủ trên mobile dùng hai cột gọn hơn; footer của trang chi tiết không đổi.
-
-## Hiệu ứng chuyển động (motion layer)
-
-Motion chính nằm trong `index.html`, chuyển trang/checkout bổ sung tại `assets/checkout.css`. Motion được thiết kế theo hướng **quiet luxury**: chậm, dứt khoát, không nảy/bounce, chỉ dùng `transform` – `opacity` – `clip-path` để giữ 60fps.
-
-- **Mở màn**: tấm màn the nhẹ (blush/glass) ~0,6s rồi kéo lên, hero đã chạy sẵn phía sau. Chỉ hiện ở lần truy cập đầu trong phiên (`sessionStorage: almira-intro`), tự bỏ qua với người dùng giảm chuyển động.
-- **Hero**: 3 dòng tiêu đề trượt lên từ mặt nạ, các khối nội dung hiện theo nhịp; panel kính nghiêng nhẹ theo con trỏ + vệt sáng; ảnh sản phẩm thật trôi chậm (Ken Burns); nút CTA hút nhẹ theo chuột.
-- **Cuộn trang**: thanh tiến trình mảnh trên đầu, header nổi lên khi cuộn, tiêu đề section tách từng từ, ảnh about wipe + parallax, đường nối 4 bước vẽ dần, danh mục/sản phẩm/perks hiện so le.
-- **Thương mại**: card sản phẩm nghiêng 3D nhẹ + spotlight theo con trỏ, ảnh zoom chậm; thêm vào giỏ có badge pop (fly-to-cart chỉ trên desktop), drawer/modal có nhịp vào riêng, toast trượt mềm.
-- **Vi tương tác**: con trỏ kính có nhãn "XEM/VIEW" khi hover ảnh sản phẩm, nút có vệt sáng (sheen), input focus rõ ràng, nút back-to-top có vòng tiến trình cuộn.
-- **A11y**: tôn trọng `prefers-reduced-motion: reduce` (tắt toàn bộ chuyển động, nội dung hiện ngay), `:focus-visible` rõ nét, focus trap trong drawer/modal, các phần nội dung được nâng cấp motion có trạng thái hiển thị an toàn và hỗ trợ reduced-motion.
-
-Tinh chỉnh nhanh: các token nằm ở `:root` trong khối `PREMIUM MOTION LAYER` (cuối `<style>`) — `--ease-lux`, `--ease-soft`, `--ease-inout`, `--dur-1…4`, `--rise`, `--stagger`. Toàn bộ logic điều phối nằm ở khối `PREMIUM MOTION LAYER` cuối `<script>`.
-
-## Kết nối dữ liệu thật từ Pancake POS
-
-Website là file tĩnh trên GitHub Pages nên **không gọi API Pancake trực tiếp từ trình duyệt** (sẽ lộ API key — key này truy cập được cả đơn hàng/khách hàng — và Pancake không mở CORS cho domain lạ). Thay vào đó, dữ liệu được đồng bộ định kỳ vào chính `index.html` bằng GitHub Actions:
-
-```
-Pancake POS API  ──►  scripts/pancake-sync.mjs  ──►  index.html (const PRODUCTS)
-(GET /shops/<id>/products)      (GitHub Actions, cron 30 phút)      ──►  GitHub Pages tự deploy
+```sh
+npm ci
+npm run db:migrate
+npm run dev
 ```
 
-- API key chỉ nằm trong **GitHub Secrets**, không xuất hiện trong file public.
-- Nếu API lỗi / không có sản phẩm hợp lệ, script thoát lỗi và **không ghi đè** — website cũ vẫn nguyên.
-- Snapshot dữ liệu lần sync gần nhất nằm ở `data/pancake-products.json` để dễ đối chiếu.
+Mặc định các kết nối Pancake và tiếp nhận đơn đều tắt. Không có catalog giả tự xuất hiện khi chưa đồng bộ. Bộ test dùng dữ liệu tổng hợp và transport cục bộ; không cần credential thật.
 
-### Cài đặt (3 bước)
+## Ranh giới quan trọng
 
-1. **Tạo API key**: Pancake POS → **Cấu hình → Cấu hình ứng dụng → API KEY → Thêm mới**. Nên tạo key riêng cho website để có thể thu hồi bất cứ lúc nào.
-2. **Lấy SHOP_ID**: xem trong URL/Thông tin shop của Pancake POS, hoặc kiểm tra bằng lệnh:
-   ```bash
-   curl "https://pos.pages.fm/api/v1/shops/<SHOP_ID>/products?api_key=<API_KEY>&page_size=1"
-   ```
-   Kết quả có `"success": true` là đúng.
-3. **Thêm secrets**: repo GitHub → **Settings → Secrets and variables → Actions → New repository secret**
-   - `PANCAKE_SHOP_ID`
-   - `PANCAKE_API_KEY`
+- Giữ hash routes, giỏ hàng theo phiên, checkout hai bước, song ngữ và reduced-motion. Frontend không giữ secret và không gọi Pancake trực tiếp.
+- Catalog cập nhật qua Worker/Cron vào D1, không commit dữ liệu mỗi lần sản phẩm đổi. GitHub Actions chỉ kiểm tra mã, không chạy nghiệp vụ định kỳ hay tự deploy production.
+- Giá hàng và cọc 50% do backend tính chính xác; phí giao/ưu đãi chưa xác nhận không được coi là đã chốt. Catalog không phải cam kết tồn kho hoặc giữ hàng.
+- “Đã tiếp nhận” khác với “đã chuyển sang Pancake”; cả hai đều không chứng minh thanh toán. Timeout sau khi gửi phải đối chiếu, không tự tạo lại đơn.
+- Website được tạo đơn mới sau gate kết nối thật; không sửa/hủy đơn, đánh dấu đã thanh toán hoặc thực hiện giao vận. Almira Finance nằm ngoài repo và vẫn chỉ đọc.
+- Credential thật, tài nguyên live, DNS, production và đơn trên shop thật cần phê duyệt riêng.
 
-   Sau đó vào **Actions → “Sync Pancake POS products” → Run workflow**. Lần chạy đầu tiên sẽ thay dữ liệu mẫu bằng sản phẩm thật, commit và Pages tự cập nhật.
+## Giao diện và tài nguyên
 
-### Map dữ liệu
+Các module tại `assets/` giữ thiết kế hiện hữu. Cấu hình đích thanh toán công khai tại [assets/payment-config.js](assets/payment-config.js): chỉ số tài khoản/người nhận và link PayPal, không API secret. Khi chưa cấu hình, phương thức tương ứng không khả dụng; không tự xác minh giao dịch.
 
-Sửa `scripts/pancake.config.json`:
-
-| Site | Nguồn Pancake |
-|---|---|
-| `name` / mô tả | `product.name`, `product.description` (đã strip HTML) |
-| `cat` | `categories[].name` → map sang `dam/ao/set/khoac/quan/phukien` (`categories.byName` hoặc `byId`) |
-| `brand` | `brand_id` → `brands` (map ID → tên); mặc định `brandFallback` |
-| `price` | giá thấp nhất trong `variations[].retail_price` (bỏ variation ẩn) |
-| `sizes` / `colors` | `product_attributes` (thuộc tính “Size”, “Màu/Color”) |
-| `img` | `images[0]` (dùng trực tiếp CDN Pancake, không nhúng base64) |
-| `tag` / `isNew` | `tags[]` theo `tags` keywords; `inserted_at` trong `newDays` ngày |
-| `was` (giá gạch), `nameEn`, `descEn`, `tag` tuỳ chỉnh | `overrides["<product-id>"]` |
-
-- Sản phẩm **ẩn/chưa publish** hoặc **danh mục chưa map** sẽ bị bỏ qua (log hiện trong Actions).
-- Muốn thêm danh mục mới: map về 1 trong 6 danh mục đang có để khớp bộ lọc UI; nếu cần danh mục mới hoàn toàn thì phải bổ sung chip lọc trong `index.html`.
-- Ảnh lỗi tải (CDN xoá ảnh) sẽ hiển thị placeholder chữ ALMIRA thay vì ảnh vỡ.
-
-### Chạy thử không cần API key
-
-```bash
-node scripts/pancake-sync.mjs --mock scripts/fixtures/pancake-products.sample.json --out /tmp/test-index.html
-```
-
-### Tuỳ chọn nâng cao
-
-- **Gần thời gian thực hơn**: dùng Pancake webhook → một relay nhỏ (Cloudflare Worker) → gọi `repository_dispatch` để chạy sync ngay, hoặc Worker cache + proxy API cho website (API key vẫn giữ kín).
-- **Đẩy đơn hàng vào Pancake POS**: cần backend/proxy (Cloudflare Worker, Vercel) gọi `POST /shops/<SHOP_ID>/orders`; không thể gọi từ trình duyệt vì lộ API key.
-- **Chỉnh tần suất sync**: sửa `cron` trong `.github/workflows/sync-pancake.yml` (mặc định 30 phút/lần).
-
-### Ghi chú với catalog thật (đã kiểm thử 253 sản phẩm)
-
-- **Ảnh** lấy từ `variations[].images` (nhiều sản phẩm Pancake không có ảnh ở cấp product).
-- **Màu/Size** lấy từ `variations[].fields` vì `product_attributes` của Pancake là danh sách dùng chung toàn shop (có thể 50+ màu).
-- **Brand**: map `brand_id` nếu có → tách tiền tố viết hoa trong tên (vd `AOORAA`, `4MUGGLE`) → suy ra từ `custom_id` (vd `SUNSETPARK01`) → còn lại dùng `brandFallback`.
-- **Tên sản phẩm** được rút gọn: bỏ đoạn trong 【…】/[…], bỏ ngoặc kép, bỏ tiền tố brand, cắt tối đa 78 ký tự (`name.maxLength`). Card chỉ hiển thị 2 dòng, hover xem tên đầy đủ.
-- **Giá**: lấy giá thấp nhất trong các variation đang bán. Sản phẩm không có variation/giá sẽ bị bỏ qua (log `no-price`).
-- **Phân trang**: website hiển thị 24 sản phẩm/lần, nút “Xem thêm” tải tiếp — phù hợp catalog vài trăm sản phẩm.
-- Danh mục chưa map hoặc sản phẩm bị bỏ qua đều được log rõ trong GitHub Actions.
-
-### Logo thương hiệu
-
-- Huy hiệu (bướm + khung hoa văn) được tách từ avatar Facebook chính thức của shop (`facebook.com/almira.studiooo`), nền đã làm trong suốt.
-- Logo dùng chung tại `assets/almira-emblem.webp`: hero, intro và footer. Favicon/apple-touch-icon vẫn nhúng base64 trong HTML.
-- Muốn đổi logo: thay file WebP nền trong suốt và cập nhật icon PNG base64 nếu cần.
-
-### Ảnh biên tập & trang hướng dẫn order
-
-- Ảnh danh mục và Về Almira là ảnh sản phẩm từ catalog thật của shop, tối ưu WebP và lưu tại `assets/editorial/`. `sources.json` ghi lại product ID, brand và URL gốc để đối chiếu; không dùng ảnh stock/demo.
-- `assets/order-guide.js` / `assets/order-guide.css` render trang hướng dẫn song ngữ: hero biên tập, timeline bốn bước, checklist, chính sách xác nhận, FAQ native và CTA. Class `og-` tránh xung đột motion legacy. Nội dung không phụ thuộc animation để xuất hiện; hỗ trợ reduced-motion.
-- Tiền cọc được diễn đạt là **50% giá trị đơn hàng sau giảm giá/chiết khấu (nếu có)**. Checkout hiện hiển thị giá trị theo giỏ hàng và chưa áp dụng ưu đãi bổ sung, nên tổng/cọc chỉ là **tạm tính**. Chưa có engine khuyến mại hay backend tính tổng cuối cùng: shop xác nhận ưu đãi, phí giao và số tiền cần thanh toán trước khi chốt đơn.
+Ảnh biên tập dùng sản phẩm thật, nguồn đối chiếu tại [assets/editorial/sources.json](assets/editorial/sources.json). Logo dùng [assets/almira-emblem.webp](assets/almira-emblem.webp). Không tự thay bằng dữ liệu/ảnh demo khi thiếu catalog.

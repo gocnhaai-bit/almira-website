@@ -1,0 +1,19 @@
+{
+  "snapshotId": "browser-synthetic-snapshot",
+  "lastSuccessfulSyncAt": "2026-10-19T03:00:00.000Z",
+  "stale": false,
+  "error": null,
+  "checkoutEnabled": false,
+  "products": [{
+    "id": "browser-synthetic-dress", "name": "Đầm kiểm thử cục bộ", "nameEn": "Local test dress",
+    "brand": "ALMIRA", "cat": "dam", "price": "100001.00", "was": null,
+    "img": "https://example.com/dress.webp",
+    "images": ["https://example.com/dress.webp"],
+    "tag": "", "isNew": false, "colors": [["Trắng", "#ffffff", "White"], ["Đen", "#111111", "Black"]],
+    "sizes": ["M", "L"], "desc": "Dữ liệu tổng hợp chỉ dùng kiểm thử local.", "descEn": "Synthetic local test data only.",
+    "variations": [
+      { "id": "browser-white-m", "productId": "browser-synthetic-dress", "shopId": "123", "size": "M", "color": "Trắng", "price": "100001.00" },
+      { "id": "browser-black-l", "productId": "browser-synthetic-dress", "shopId": "123", "size": "L", "color": "Đen", "price": "200000.00" }
+    ]
+  }]
+}

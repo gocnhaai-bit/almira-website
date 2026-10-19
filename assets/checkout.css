@@ -1,4 +1,9 @@
-/* Route surfaces and bounded purchase controls. */
+/* Catalog startup and sync notice */
+.catalog-status{display:flex;align-items:center;justify-content:center;gap:14px;padding:12px 16px;margin:100px auto 18px;max-width:1120px;border:1px solid var(--glass-line);border-radius:14px;background:rgba(255,255,255,.55);font-size:13px;color:var(--ink-2)}
+.catalog-status[hidden]{display:none}
+.catalog-status.is-error{color:var(--danger)}
+.catalog-retry{border:0;border-bottom:1px solid currentColor;background:none;padding:2px 0;font:inherit;font-weight:600;color:inherit}
+
 body[data-page]:not([data-page="home"]) main{display:none}
 body.route-section #sectionView,body.route-checkout #checkoutView{display:block}
 #sectionContent>.block{padding-top:12px}
