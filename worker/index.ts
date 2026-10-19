@@ -14,7 +14,7 @@ export default {
       if (path.startsWith("/api/admin/")) {
         await admin(request, env); await rateLimit(request, env, "admin", 20);
         if (path === "/api/admin/sync" && request.method === "POST") {
-          await syncCatalogStep(env); return json({ accepted: true });
+          return json(await syncCatalogStep(env));
         }
         const match = path.match(/^\/api\/admin\/orders\/([a-f0-9-]{36})(?:\/(retry|reconcile|purge-customer))?$/);
         if (match) {

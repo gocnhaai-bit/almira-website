@@ -11,7 +11,7 @@ type State = {
 };
 const INTERVAL = 30 * 60_000;
 const LEASE = 60_000;
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 90;
 const PALETTE = ["#E7DFD2", "#1d1a16", "#c9b896", "#9a958e", "#efe6d4", "#7a5c40", "#e3b7c4", "#7d8fa8"];
 const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").replace(/\s+/g, " ").trim();
 const str = (v: unknown) => typeof v === "string" || typeof v === "number" ? String(v).trim() : "";
@@ -140,25 +140,32 @@ export async function syncCatalogStep(env: Env, transport: typeof fetch = fetch,
   }
   const snapshot = current.staging_snapshot_id;
   if (!snapshot || current.lease_token !== token || current.lease_until == null || current.lease_until <= now) return { status: "stale" as const };
-  const snapshotShop = await env.DB.prepare("SELECT shop_id FROM catalog_snapshots WHERE id=?").bind(snapshot).first<string>("shop_id");
+  const generation = await env.DB.prepare("SELECT shop_id,created_at FROM catalog_snapshots WHERE id=?").bind(snapshot).first<{shop_id: string; created_at: number}>();
+  const snapshotShop = generation?.shop_id;
   try {
     if (snapshotShop !== shop) throw new Error("invalid_page");
     const url = new URL(`https://pos.pages.fm/api/v1/shops/${shop}/products/variations`);
     url.searchParams.set("api_key", env.PANCAKE_READ_API_KEY); url.searchParams.set("page_size", String(PAGE_SIZE)); url.searchParams.set("page_number", String(current.next_page));
-    const response = await transport(url, { redirect: "error", signal: AbortSignal.timeout(20000) });
+    const response = await transport(url, { redirect: "manual", signal: AbortSignal.timeout(20000) });
+    if (response.status >= 300 && response.status < 400) throw new Error("upstream_redirect");
     if (!response.ok) throw new Error(response.status === 401 || response.status === 403 ? "auth" : "upstream");
     const body: unknown = await response.json();
     if (!body || typeof body !== "object" || Array.isArray(body)) throw new Error("invalid_page");
     const data = body as Row;
-    if ((data.shop_id != null && str(data.shop_id) !== shop) || data.success !== true || !Array.isArray(data.data) || !Number.isInteger(data.total_pages) || (data.total_pages as number) < 1 || !Number.isInteger(data.total_entries) || (data.total_entries as number) < 0 || (data.total_pages as number) < current.next_page || (data.total_pages as number) > 10000 || data.page_number !== current.next_page || (current.total_pages != null && (current.total_pages !== data.total_pages || current.total_entries !== data.total_entries))) throw new Error("invalid_page");
+    if ((data.shop_id != null && str(data.shop_id) !== shop) || data.success !== true || !Array.isArray(data.data) || !Number.isInteger(data.total_pages) || (data.total_pages as number) < 1 || !Number.isInteger(data.total_entries) || (data.total_entries as number) < 0 || (data.total_pages as number) < current.next_page || (data.total_pages as number) > 10000 || data.page_number !== current.next_page || (current.total_pages != null && (current.total_pages !== data.total_pages || current.total_entries !== data.total_entries))) {
+      console.warn("catalog_page_metadata", JSON.stringify({page: data.page_number, totalPages: data.total_pages, totalEntries: data.total_entries, count: Array.isArray(data.data) ? data.data.length : null, success: data.success === true, expectedPage: current.next_page}));
+      throw new Error("invalid_page");
+    }
     const received = current.received_entries + data.data.length;
     if (data.data.length > PAGE_SIZE || received > (data.total_entries as number) || (current.next_page < (data.total_pages as number) && data.data.length === 0)) throw new Error("invalid_page");
     const products = mapPage(data.data, shop, now); const seen = new Set<string>();
     for (const item of data.data) { const id = str((item as Row).id); if (!id || seen.has(id)) throw new Error("duplicate_variation"); seen.add(id); }
     const statements: D1PreparedStatement[] = [];
     let publishedProducts = 0;
+    const priorRows = products.length ? await env.DB.prepare(`SELECT product_id,payload FROM catalog_products WHERE snapshot_id=? AND product_id IN (${products.map(() => "?").join(",")})`).bind(snapshot, ...products.map(p => p.id)).all<{product_id: string; payload: string}>() : {results: []};
+    const priorById = new Map(priorRows.results.map(row => [row.product_id, row]));
     for (const product of products) {
-      const priorRow = await env.DB.prepare("SELECT payload FROM catalog_products WHERE snapshot_id=? AND product_id=?").bind(snapshot, product.id).first<{ payload: string }>();
+      const priorRow = priorById.get(product.id);
       if (priorRow) {
         const prior = JSON.parse(priorRow.payload) as Product; const ids = new Set(prior.variations.map(v => v.id));
         if (product.variations.some(v => ids.has(v.id))) throw new Error("duplicate_variation");
@@ -178,13 +185,14 @@ export async function syncCatalogStep(env: Env, transport: typeof fetch = fetch,
     if (done) {
       statements.push(env.DB.prepare("UPDATE catalog_snapshots SET status='retired' WHERE id=(SELECT active_snapshot_id FROM catalog_state WHERE id=1 AND lease_token=? AND staging_snapshot_id=?)").bind(token, snapshot));
       statements.push(env.DB.prepare("UPDATE catalog_snapshots SET status='active' WHERE id=? AND EXISTS(SELECT 1 FROM catalog_state WHERE id=1 AND lease_token=? AND staging_snapshot_id=?)").bind(snapshot, token, snapshot));
-      statements.push(env.DB.prepare("UPDATE catalog_state SET active_snapshot_id=?,last_successful_sync_at=?,last_error=NULL,staging_snapshot_id=NULL,next_sync_at=?,lease_token=NULL,lease_until=NULL WHERE id=1 AND lease_token=? AND staging_snapshot_id=?").bind(snapshot, now, now + INTERVAL, token, snapshot));
+      statements.push(env.DB.prepare("UPDATE catalog_state SET active_snapshot_id=?,last_successful_sync_at=?,last_error=NULL,staging_snapshot_id=NULL,next_sync_at=?,lease_token=NULL,lease_until=NULL WHERE id=1 AND lease_token=? AND staging_snapshot_id=?").bind(snapshot, now, (generation?.created_at ?? now) + INTERVAL, token, snapshot));
     }
     if (Date.now() - startedAt >= LEASE || await env.DB.prepare("SELECT lease_token FROM catalog_state WHERE id=1").first("lease_token") !== token) return { status: "stale" as const };
     await env.DB.batch(statements);
     return { status: done ? "complete" as const : "page" as const, page: current.next_page };
   } catch (error) {
-    const code = error instanceof Error && ["auth", "upstream", "invalid_page", "invalid_price", "duplicate_variation", "incomplete_catalog"].includes(error.message) ? error.message : "sync_failed";
+    const transportCode = error instanceof TypeError && /fetch.*context|illegal invocation/i.test(error.message) ? "transport_context" : error instanceof TypeError && /header|character/i.test(error.message) ? "invalid_credential_format" : "transport_failed";
+    const code = error instanceof TypeError ? transportCode : error instanceof SyntaxError ? "invalid_json" : error instanceof Error && error.message.startsWith("D1_") ? "database_failed" : error instanceof Error && ["auth", "upstream", "upstream_redirect", "invalid_page", "invalid_price", "duplicate_variation", "incomplete_catalog"].includes(error.message) ? error.message : "sync_failed";
     await env.DB.batch([
       env.DB.prepare("UPDATE catalog_snapshots SET status='failed' WHERE id=(SELECT staging_snapshot_id FROM catalog_state WHERE id=1 AND lease_token=?)").bind(token),
       env.DB.prepare("UPDATE catalog_state SET last_error=?,staging_snapshot_id=NULL,next_sync_at=?,lease_token=NULL,lease_until=NULL,next_page=1,total_pages=NULL,total_entries=NULL,received_entries=0 WHERE id=1 AND lease_token=?").bind(code, now + INTERVAL, token)

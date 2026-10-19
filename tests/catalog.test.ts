@@ -14,7 +14,7 @@ const request = (body: Response) => async (input: RequestInfo | URL) => {
   const url = new URL(String(input));
   expect(url.pathname).toBe("/api/v1/shops/123/products/variations");
   expect(url.searchParams.get("api_key")).toBe("synthetic-key");
-  expect(url.searchParams.get("page_size")).toBe("20");
+  expect(url.searchParams.get("page_size")).toBe("90");
   return body;
 };
 
@@ -100,6 +100,7 @@ describe("catalog snapshots", () => {
     expect(finish.status).toBe("complete");
     const updated = await readCatalog(bindings);
     expect(updated.products[0].variations.map(v => v.id)).toEqual(["v-2", "v-3"]);
+    expect(await env.DB.prepare("SELECT next_sync_at FROM catalog_state WHERE id=1").first("next_sync_at")).toBe(1_700_000_001_000 + 30 * 60000);
     await env.DB.prepare("UPDATE catalog_state SET next_sync_at=0").run();
     const failed = await syncCatalogStep(bindings, request(response([product("duplicate"), product("duplicate")])) as typeof fetch, 1_700_000_003_000);
     expect(failed).toEqual({ status: "failed", error: "duplicate_variation" });
