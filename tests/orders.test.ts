@@ -79,6 +79,75 @@ describe("durable checkout", () => {
   });
 });
 describe("Pancake outbox", () => {
+  it.each(["flat", "wrapped"])("confirms the POS UUID without custom_id (%s) and never sends twice", async shape => {
+    const { env, order } = await accepted();
+    const data = { id: order.websiteOrderId, shop_id: 123, system_id: 806, custom_id: null };
+    const transport = fake(async () => Response.json(shape === "wrapped" ? { success: true, data } : data));
+    await dispatchOrders(env, transport); await dispatchOrders(env, transport);
+    expect(transport).toHaveBeenCalledTimes(1);
+    expect((await orderStatus(env, order.statusToken)).status).toBe("synced");
+    expect(await env.DB.prepare("SELECT pancake_order_id FROM orders").first("pancake_order_id")).toBe(order.websiteOrderId);
+    expect(await env.DB.prepare("SELECT state FROM outbox").first("state")).toBe("done");
+  });
+  it.each(["wrong_uuid", "wrong_shop", "conflicting_reference", "unsafe_number", "missing_id", "false_success", "null_data", "array_data"])("quarantines an unconfirmed POS response: %s", async kind => {
+    const { env, order } = await accepted();
+    let data: any = { id: order.websiteOrderId, shop_id: 123 };
+    if (kind === "wrong_uuid") data.id = crypto.randomUUID();
+    if (kind === "wrong_shop") data.shop_id = 456;
+    if (kind === "conflicting_reference") data.custom_id = "other-order";
+    if (kind === "unsafe_number") { data.id = Number.MAX_SAFE_INTEGER + 1; data.custom_id = order.websiteOrderId; }
+    if (kind === "missing_id") { delete data.id; data.system_id = 806; }
+    if (kind === "false_success") data.success = false;
+    if (kind === "null_data") data = { data: null };
+    if (kind === "array_data") data = { data: [data] };
+    const transport = fake(async () => Response.json(data));
+    await dispatchOrders(env, transport); await dispatchOrders(env, transport);
+    expect(transport).toHaveBeenCalledTimes(1);
+    expect((await orderStatus(env, order.statusToken)).status).toBe("unknown");
+    await expect(retryOrder(env, order.websiteOrderId)).rejects.toMatchObject({ code: "unsafe_to_retry" });
+  });
+  it("accepts a distinct UUID only with an exact custom reference", async () => {
+    const { env, order } = await accepted(); const posId = crypto.randomUUID();
+    await dispatchOrders(env, fake(async () => Response.json({data:{id:posId,shop_id:123,custom_id:order.websiteOrderId}})));
+    expect((await orderStatus(env, order.statusToken)).status).toBe("synced");
+    expect(await env.DB.prepare("SELECT pancake_order_id FROM orders").first("pancake_order_id")).toBe(posId);
+  });
+  it("rejects malformed reconciliation IDs before any upstream request", async () => {
+    const { env, order } = await accepted();
+    await dispatchOrders(env, fake(async () => { throw new Error("timeout"); }));
+    const transport = fake(async () => Response.json({}));
+    for (const id of ["../orders", "0", "1e5", "123?api_key=other", "not-a-uuid"]) {
+      await expect(reconcileOrder({ ...env, PANCAKE_READ_ENABLED:"true", PANCAKE_READ_API_KEY:"synthetic" }, order.websiteOrderId, {pancakeOrderId:id}, transport)).rejects.toMatchObject({code:"reconciliation_unavailable"});
+    }
+    expect(transport).not.toHaveBeenCalled();
+  });
+  it("reconciles a UUID by GET only and records the API ID rather than system_id", async () => {
+    const { env, order } = await accepted();
+    await dispatchOrders(env, fake(async () => { throw new Error("timeout"); }));
+    const transport = fake(async (url: URL, init: RequestInit) => {
+      expect(url.pathname).toBe(`/api/v1/shops/123/orders/${order.websiteOrderId}`);
+      expect(init.method || "GET").toBe("GET"); expect(init.redirect).toBe("manual");
+      return Response.json({ success: true, data: { id: order.websiteOrderId, shop_id: 123, system_id: 806 } });
+    });
+    const result = await reconcileOrder({ ...env, PANCAKE_READ_ENABLED: "true", PANCAKE_READ_API_KEY: "synthetic" }, order.websiteOrderId, { pancakeOrderId: order.websiteOrderId }, transport);
+    expect(result.status).toBe("synced");
+    expect(await env.DB.prepare("SELECT pancake_order_id FROM orders").first("pancake_order_id")).toBe(order.websiteOrderId);
+    expect(await env.DB.prepare("SELECT count(*) n FROM admin_audit WHERE action='reconcile'").first("n")).toBe(1);
+    expect(await env.DB.prepare("SELECT state FROM outbox").first("state")).toBe("done");
+    await dispatchOrders(env, transport); expect(transport).toHaveBeenCalledTimes(1);
+  });
+  it("does not reconcile a different UUID or accept a display number as the API ID", async () => {
+    const { env, order } = await accepted();
+    await dispatchOrders(env, fake(async () => { throw new Error("timeout"); }));
+    const readEnv = { ...env, PANCAKE_READ_ENABLED: "true", PANCAKE_READ_API_KEY: "synthetic" };
+    for (const data of [{ id: crypto.randomUUID(), shop_id: 123 }, { id: order.websiteOrderId, shop_id: 123, custom_id: "wrong" }, { id: order.websiteOrderId, shop_id: 456 }]) {
+      await expect(reconcileOrder(readEnv, order.websiteOrderId, { pancakeOrderId: order.websiteOrderId }, fake(async () => Response.json({data})))).rejects.toMatchObject({ code: "reconciliation_mismatch" });
+    }
+    await expect(reconcileOrder(readEnv, order.websiteOrderId, { pancakeOrderId: "806" }, fake(async () => Response.json({id:order.websiteOrderId,shop_id:123,system_id:806})))).rejects.toMatchObject({code:"reconciliation_mismatch"});
+    expect((await orderStatus(env, order.statusToken)).status).toBe("unknown");
+    expect(await env.DB.prepare("SELECT count(*) n FROM admin_audit").first("n")).toBe(0);
+  });
+
   it("dispatches a single concurrent send and verifies confirmation identity", async () => {
     const { env, order } = await accepted();
     const transport = fake(async (_url: unknown, init: RequestInit) => {

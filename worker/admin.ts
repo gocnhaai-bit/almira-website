@@ -1,5 +1,6 @@
 import type { Env, OrderRow } from "./types";
-import { ApiError, object, text } from "./security";
+import { ApiError, text } from "./security";
+import { confirmedPancakeId, pancakeOrderId } from "./pancake-identity";
 
 export async function adminOrder(env: Env, id: string) {
   const order = await env.DB.prepare("SELECT * FROM orders WHERE id=?").bind(id).first<OrderRow>();
@@ -19,18 +20,17 @@ export async function retryOrder(env: Env, id: string) {
 export async function reconcileOrder(env: Env, id: string, input: Record<string, unknown>, transport: typeof fetch = fetch) {
   const order = await env.DB.prepare("SELECT * FROM orders WHERE id=?").bind(id).first<OrderRow>();
   if (!order || !["unknown", "manual"].includes(order.status)) throw new ApiError(409, "not_reconcilable");
-  const pancakeId = text(input.pancakeOrderId, 30);
-  if (!/^\d+$/.test(pancakeId) || order.shop_id !== env.PANCAKE_SHOP_ID || env.PANCAKE_READ_ENABLED !== "true" || !env.PANCAKE_READ_API_KEY) throw new ApiError(409, "reconciliation_unavailable");
+  const pancakeId = pancakeOrderId(text(input.pancakeOrderId, 36));
+  if (!pancakeId || order.shop_id !== env.PANCAKE_SHOP_ID || env.PANCAKE_READ_ENABLED !== "true" || !env.PANCAKE_READ_API_KEY) throw new ApiError(409, "reconciliation_unavailable");
   const url = new URL(`https://pos.pages.fm/api/v1/shops/${encodeURIComponent(order.shop_id)}/orders/${pancakeId}`);
   url.searchParams.set("api_key", env.PANCAKE_READ_API_KEY);
-  let data: Record<string, unknown>;
+  let confirmedId: string | null;
   try {
     const response = await transport(url, { redirect: "manual", signal: AbortSignal.timeout(15000) });
     if (!response.ok) throw new Error();
-    const value = object(await response.json()); data = value.data ? object(value.data) : value;
-    if (value.success === false) throw new Error();
+    confirmedId = confirmedPancakeId(await response.json(), order);
   } catch { throw new ApiError(502, "reconciliation_failed"); }
-  if (String(data.id) !== pancakeId || String(data.shop_id) !== order.shop_id || data.custom_id !== id) throw new ApiError(409, "reconciliation_mismatch");
+  if (confirmedId !== pancakeId) throw new ApiError(409, "reconciliation_mismatch");
   await env.DB.batch([
     env.DB.prepare("INSERT INTO admin_audit(id,order_id,action,created_at) VALUES (?,?,'reconcile',?)").bind(crypto.randomUUID(), id, Date.now()),
     env.DB.prepare("UPDATE orders SET status='synced',pancake_order_id=?,error_code=NULL WHERE id=? AND status IN ('unknown','manual')").bind(pancakeId, id),

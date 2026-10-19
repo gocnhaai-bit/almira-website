@@ -1,5 +1,6 @@
 import type { Env, OrderRow, Quote } from "./types";
 import { integerVnd } from "./money";
+import { confirmedPancakeId } from "./pancake-identity";
 
 export function pancakePayload(order: OrderRow) {
   if (!/^\d+$/.test(order.shop_id)) throw new Error("invalid_shop");
@@ -67,12 +68,11 @@ export async function dispatchOrders(env: Env, transport: typeof fetch = fetch, 
       await finish(env, order.id, lease, "unknown", "unknown", "create_redirect_unconfirmed"); return;
     }
     // The API has no documented create idempotency. Any non-confirmation needs reconciliation, including 5xx/429.
-    const value = await response.json() as Record<string, unknown>;
-    const data = value.data && typeof value.data === "object" ? value.data as Record<string, unknown> : value;
-    if (!response.ok || value.success === false || (typeof data.id === "number" && !Number.isSafeInteger(data.id)) || !["string", "number"].includes(typeof data.id) || !/^\d+$/.test(String(data.id)) || String(data.shop_id) !== order.shop_id || data.custom_id !== order.id) {
+    const id = confirmedPancakeId(await response.json(), order);
+    if (!response.ok || !id) {
       await finish(env, order.id, lease, "unknown", "unknown", "create_not_confirmed"); return;
     }
-    await finish(env, order.id, lease, "done", "synced", null, String(data.id));
+    await finish(env, order.id, lease, "done", "synced", null, id);
   } catch {
     await finish(env, order.id, lease, "unknown", "unknown", "create_result_unknown");
   }

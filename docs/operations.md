@@ -37,10 +37,12 @@ Hợp đồng thực thi tại [worker/index.ts](../worker/index.ts) và [worker
 - Sync: mỗi request xử lý một trang và trả trạng thái `page`, `complete`, `not_due`, `busy` hoặc `failed`; chỉ `complete` mới công bố snapshot. Không gọi endpoint này trong khoảng kiểm chứng chu kỳ tự động.
 - Xem đơn quản trị: chỉ metadata xử lý và tổng tiền, không công khai người nhận.
 - Retry: chỉ công việc chắc chắn chưa gửi và đang pending/retryable; unknown/manual bị từ chối.
-- Reconcile: cung cấp Pancake order ID mà nhân sự đã tìm được; backend GET xác minh `shop_id`, `id`, `custom_id` trước khi ghi đã đồng bộ. Không suy ra không tồn tại chỉ vì tìm kiếm không thấy.
+- Reconcile: cung cấp Pancake order ID mà nhân sự đã tìm được; backend GET xác minh API ID (số hoặc UUID), đúng `shop_id` và mã website trước khi ghi đã đồng bộ. Nếu `custom_id` có giá trị thì phải khớp mã website; nếu thiếu/null/rỗng thì chỉ chấp nhận `id` bằng chính UUID website đã lưu. Không dùng `system_id` thay API ID. Không suy ra không tồn tại chỉ vì tìm kiếm không thấy.
 - Purge customer: chỉ đơn đã synced, xóa thông tin nhận hàng trong Website; không xóa dữ liệu bên Pancake.
 
 Không đưa raw request/response Pancake hoặc thông tin nhận hàng vào báo lỗi, screenshot, ticket hay Git.
+
+Quy tắc xác nhận dùng chung tại [worker/pancake-identity.ts](../worker/pancake-identity.ts) cho cả gửi đơn và reconcile. HTTP lỗi, redirect, `success:false`, ID không hợp lệ hoặc tham chiếu mâu thuẫn không được coi là thành công. UUID khác mã website chỉ được chấp nhận khi `custom_id` khớp chính xác. Đây là xác nhận đồng bộ, không phải xác nhận thanh toán, tồn kho hay giao vận.
 
 ## Khi đơn lỗi hoặc kết quả chưa xác định
 
