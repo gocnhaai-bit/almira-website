@@ -2,7 +2,7 @@
 
 ## Nguồn cấu hình
 
-[wrangler.jsonc](../wrangler.jsonc) là cấu hình runtime; [package.json](../package.json) là danh sách lệnh; [migrations](../migrations/) sở hữu schema. Local và staging có binding riêng. ID D1 trong repo chỉ là placeholder, không phải tài nguyên đã tạo. Không có route production, không bật preview/Workers Builds tự deploy.
+[wrangler.jsonc](../wrangler.jsonc) là cấu hình runtime; [package.json](../package.json) là danh sách lệnh; [migrations](../migrations/) sở hữu schema. Production dùng D1 riêng và route apex `almirastudio.vn/*`; local và staging tách binding. ID staging vẫn là placeholder, chưa tạo tài nguyên staging. Catalog production được phép đọc Pancake; checkout và ghi đơn vẫn tắt. Preview và Workers Builds tự deploy chưa bật.
 
 Chọn D1 outbox + Cron thay Queues vì lượng đơn ban đầu chưa chứng minh cần thêm dịch vụ. Đơn được thử chuyển sau khi lưu; Cron phục hồi công việc còn chờ. Đổi lại, công việc gián đoạn có thể chờ lượt chạy tiếp theo. Không có giao dịch atomic chung giữa D1 và Pancake.
 
@@ -34,7 +34,7 @@ Staging phải dùng D1 riêng và shop/key thử nghiệm đã được phê du
 
 Hợp đồng thực thi tại [worker/index.ts](../worker/index.ts) và [worker/admin.ts](../worker/admin.ts). Mọi request quản trị cần `Authorization: Bearer <ADMIN_TOKEN>`; token không nằm trong URL. Dùng HTTP client lấy secret từ biến môi trường/private secret store, không ghi vào log hay lịch sử lệnh. API trả `no-store`.
 
-- Sync: mỗi request xử lý một phần có giới hạn, xem metadata tại catalog. Không hiểu “accepted” là toàn bộ catalog đã publish.
+- Sync: mỗi request xử lý một trang và trả trạng thái `page`, `complete`, `not_due`, `busy` hoặc `failed`; chỉ `complete` mới công bố snapshot. Không gọi endpoint này trong khoảng kiểm chứng chu kỳ tự động.
 - Xem đơn quản trị: chỉ metadata xử lý và tổng tiền, không công khai người nhận.
 - Retry: chỉ công việc chắc chắn chưa gửi và đang pending/retryable; unknown/manual bị từ chối.
 - Reconcile: cung cấp Pancake order ID mà nhân sự đã tìm được; backend GET xác minh `shop_id`, `id`, `custom_id` trước khi ghi đã đồng bộ. Không suy ra không tồn tại chỉ vì tìm kiếm không thấy.
@@ -56,7 +56,9 @@ Nếu D1 đã lưu nhưng browser mất response, khách thử lại với cùng
 
 ## Catalog và giới hạn
 
-Mapping tại [worker/catalog.ts](../worker/catalog.ts), cấu hình thương hiệu/danh mục tại [scripts/pancake.config.json](../scripts/pancake.config.json). Không dùng ghi chú nội bộ làm mô tả công khai. Snapshot mới chỉ được công bố khi đầy đủ/hợp lệ; lỗi giữ snapshot cũ. Dữ liệu cũ chặn quote mới, không được coi là giữ hàng.
+Mapping tại [worker/catalog.ts](../worker/catalog.ts), cấu hình thương hiệu/danh mục tại [scripts/pancake.config.json](../scripts/pancake.config.json). Endpoint biến thể cung cấp mã hàng trong `product.display_id`; dùng làm nguồn suy ra thương hiệu khi `custom_id` không có để giữ quy tắc bản cũ, không đưa mã nguồn này vào payload public. Không dùng ghi chú nội bộ làm mô tả công khai. Snapshot mới chỉ được công bố khi đầy đủ/hợp lệ; lỗi giữ snapshot cũ. Dữ liệu cũ chặn quote mới, không được coi là giữ hàng.
+
+Cron chạy mỗi phút để xử lý checkpoint; generation mới đến hạn sau 30 phút tính từ lúc generation trước bắt đầu. Lịch một phút không có nghĩa publish mỗi phút: chỉ publish khi đọc đủ trang. Thời gian hoàn tất và CPU thực tế phải được kiểm chứng; khi catalog tăng đủ lớn có thể vượt thời gian30 phút và cần điều chỉnh đã được duyệt.
 
 OpenAPI chính thức: <https://docs.pancake.biz/pos/api/openapi.json>. Endpoint catalog cũ GET `/products` không có trong tài liệu đã kiểm tra; adapter dùng `/products/variations`. API có `custom_id` nhưng chưa có bằng chứng unique/idempotency hay tìm kiếm reference đủ tin cậy. Quota và quyền key còn cần xác minh với Pancake.
 
@@ -66,6 +68,12 @@ Nguồn để kiểm tra lại trước deploy:
 - <https://developers.cloudflare.com/workers/platform/pricing/>
 - <https://developers.cloudflare.com/workers/platform/limits/>
 - <https://developers.cloudflare.com/d1/platform/pricing/>
+
+## Kiểm chứng riêng một đơn mua thật
+
+`CHECKOUT_ENABLED` công khai vẫn tắt. Chỉ bật `CHECKOUT_TRIAL_ENABLED` khi đã có kho được xác minh, key ghi riêng và `CHECKOUT_TRIAL_SECRET` tối thiểu32 ký tự nhập qua Cloudflare. Form trên checkout đổi mã riêng thành cookie HttpOnly/Secure/SameSite=Strict trong một giờ; không gửi mã qua URL hoặc lưu browser storage. Backend kiểm tra phiên và chỉ tiếp nhận một đơn mới khi bảng orders chưa có đơn; replay cùng khóa vẫn trả đơn cũ. Không xóa đơn/reset suất để vượt giới hạn, kể cả khi kết quả gửi chưa xác định.
+
+Sếp tự chọn hàng và xác nhận quote; nhân sự không tạo đơn thay chỉ để thử API. Không đánh dấu đã thanh toán hoặc yêu cầu chuyển tiền cho kiểm chứng. Không mở public checkout sau lượt này nếu chưa có phê duyệt riêng. Secret kiểm chứng và key API không đưa vào chat, Git hoặc tài liệu.
 
 ## Chính sách PII trước production
 

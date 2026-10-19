@@ -25,7 +25,7 @@ export async function reconcileOrder(env: Env, id: string, input: Record<string,
   url.searchParams.set("api_key", env.PANCAKE_READ_API_KEY);
   let data: Record<string, unknown>;
   try {
-    const response = await transport(url, { redirect: "error", signal: AbortSignal.timeout(15000) });
+    const response = await transport(url, { redirect: "manual", signal: AbortSignal.timeout(15000) });
     if (!response.ok) throw new Error();
     const value = object(await response.json()); data = value.data ? object(value.data) : value;
     if (value.success === false) throw new Error();

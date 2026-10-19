@@ -45,6 +45,14 @@ describe("catalog snapshots", () => {
     expect(catalog.products[0].variations[0]).toMatchObject({ id: "v-1", productId: "product-1", shopId: "123", size: "v-1" });
   });
 
+  it("derives the existing brand from variation endpoint display_id without publishing the source code", async () => {
+    const raw = product("v-brand");
+    Object.assign(raw.product, { name: "SelfMing Test dress", display_id: "SELFMING03" });
+    await syncCatalogStep(bindings, request(response([raw])) as typeof fetch);
+    const mapped = (await readCatalog(bindings)).products[0];
+    expect(mapped.brand).toBe("SELFMING");
+    expect(mapped).not.toHaveProperty("display_id");
+  });
   it("keeps the last good snapshot when a later page fails or counts change", async () => {
     const prior = await readCatalog(bindings);
     await syncCatalogStep(bindings, request(response([product("v-1")], 1, 2, 2)) as typeof fetch, 1_700_000_001_000);

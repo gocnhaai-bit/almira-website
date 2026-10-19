@@ -61,7 +61,12 @@ export async function dispatchOrders(env: Env, transport: typeof fetch = fetch, 
   url.searchParams.set("api_key", env.PANCAKE_WRITE_API_KEY);
   try {
     const response = await transport(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: payload,
-      redirect: "error", signal: AbortSignal.timeout(20000) });    // The API has no documented create idempotency. Any non-confirmation needs reconciliation, including 5xx/429.
+      redirect: "manual", signal: AbortSignal.timeout(20000) });
+    // Never follow redirects carrying order data or credentials to another destination.
+    if (response.status >= 300 && response.status < 400) {
+      await finish(env, order.id, lease, "unknown", "unknown", "create_redirect_unconfirmed"); return;
+    }
+    // The API has no documented create idempotency. Any non-confirmation needs reconciliation, including 5xx/429.
     const value = await response.json() as Record<string, unknown>;
     const data = value.data && typeof value.data === "object" ? value.data as Record<string, unknown> : value;
     if (!response.ok || value.success === false || (typeof data.id === "number" && !Number.isSafeInteger(data.id)) || !["string", "number"].includes(typeof data.id) || !/^\d+$/.test(String(data.id)) || String(data.shop_id) !== order.shop_id || data.custom_id !== order.id) {

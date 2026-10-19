@@ -15,6 +15,7 @@ export interface Env {
   PANCAKE_SHOP_ID?: string; PANCAKE_WAREHOUSE_ID?: string;
   PANCAKE_READ_API_KEY?: string; PANCAKE_WRITE_API_KEY?: string;
   ORDER_TOKEN_SECRET?: string; ADMIN_TOKEN?: string;
+  CHECKOUT_TRIAL_ENABLED?: string; CHECKOUT_TRIAL_SECRET?: string;
 }
 export interface QuoteItem {
   productId: string; variationId: string; quantity: number;

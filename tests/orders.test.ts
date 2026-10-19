@@ -82,6 +82,8 @@ describe("Pancake outbox", () => {
   it("dispatches a single concurrent send and verifies confirmation identity", async () => {
     const { env, order } = await accepted();
     const transport = fake(async (_url: unknown, init: RequestInit) => {
+      const request = new Request(String(_url), init);
+      expect(request.redirect).toBe("manual");
       const payload = JSON.parse(init.body as string);
       expect(payload.custom_id).toBe(order.websiteOrderId); expect(payload.status).toBe(0);
       expect(payload).not.toHaveProperty("prepaid"); expect(payload).not.toHaveProperty("partner");

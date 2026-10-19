@@ -71,13 +71,14 @@ export async function acceptOrder(env: Env, input: Record<string, unknown>, key:
     env.DB.prepare(`INSERT INTO orders(id,idempotency_key,payload_hash,token_hash,status,shop_id,warehouse_id,customer_json,quote_json,payment_method,total,deposit,remaining,created_at)
       SELECT ?,?,?,?,'pending',?,?,?,?,?,?,?,?,? FROM catalog_state
       WHERE id=1 AND active_snapshot_id=? AND last_successful_sync_at>=?
+      AND (?!='true' OR NOT EXISTS(SELECT 1 FROM orders))
       ON CONFLICT(idempotency_key) DO NOTHING`).bind(id, key, payloadHash, await hash(token), quote.shopId, env.PANCAKE_WAREHOUSE_ID!,
       JSON.stringify(normalized.customer), JSON.stringify(quote), normalized.paymentMethod as string, quote.total, quote.deposit, quote.remaining, now,
-      quote.snapshotId, now - catalogMaxAge(env)),
+      quote.snapshotId, now - catalogMaxAge(env), env.CHECKOUT_TRIAL_ENABLED || "false"),
     env.DB.prepare(`INSERT INTO outbox(order_id,state,next_attempt_at) SELECT id,'pending',? FROM orders WHERE id=?`).bind(now, id)
   ]);
   const saved = await env.DB.prepare("SELECT * FROM orders WHERE idempotency_key=?").bind(key).first<OrderRow>();
-  if (!saved) throw new ApiError(409, "catalog_changed");
+  if (!saved) throw new ApiError(409, env.CHECKOUT_TRIAL_ENABLED === "true" ? "trial_slot_unavailable" : "catalog_changed");
   if (saved.payload_hash !== payloadHash) throw new ApiError(409, "idempotency_conflict");
   return receipt(env, saved);
 }

@@ -70,7 +70,7 @@ function mapPage(rows: unknown[], shopId: string, now: number): Product[] {
     });
     const rawName = safeText(raw.name, 300); const brandToken = brandFromName(rawName);
     const brands = config.brands as Record<string, string>;
-    const customBrand = str(raw.custom_id).match(/^([A-Za-z]{4,})(?=\d|$)/)?.[1]?.toUpperCase() || "";
+    const customBrand = str(raw.custom_id || raw.display_id).match(/^([A-Za-z]{4,})(?=\d|$)/)?.[1]?.toUpperCase() || "";
     const inferredBrand = config.brandFromCustomId !== false && !config.brandBlocklist.includes(customBrand) ? customBrand : "";
     const brand = safeText(override.brand || (raw.brand && typeof raw.brand === "object" ? str((raw.brand as Row).name) : str(raw.brand)) || str(raw.brand_name) || brands[str(raw.brand_id)] || brandToken || inferredBrand || config.brandFallback || "ALMIRA", 80);
     let name = str(override.name) || rawName;

@@ -67,6 +67,24 @@ export function catalogMaxAge(env: Env) {
   if (!Number.isFinite(seconds) || seconds < 1 || seconds > 86400) throw new ApiError(503, "invalid_catalog_policy");
   return seconds * 1000;
 }
+export function checkoutTrialEnabled(env: Env) {
+  return env.CHECKOUT_TRIAL_ENABLED === "true" && (env.CHECKOUT_TRIAL_SECRET?.length || 0) >= 32;
+}
+export async function checkoutTrialSession(request: Request, env: Env, now = Date.now()) {
+  if (!checkoutTrialEnabled(env) || !env.ORDER_TOKEN_SECRET) return false;
+  const value = request.headers.get("Cookie")?.match(/(?:^|;\s*)__Host-almira-trial=([^;]+)/)?.[1] || "";
+  const [expires, signature, extra] = value.split(".");
+  if (extra || !/^\d{13}$/.test(expires) || Number(expires) <= now || Number(expires) > now + 3600000) return false;
+  return signature === await hmac(env.ORDER_TOKEN_SECRET, `checkout-trial:${expires}:${env.CHECKOUT_TRIAL_SECRET}`);
+}
+export async function authorizeCheckoutTrial(request: Request, env: Env, value: unknown) {
+  if (!checkoutTrialEnabled(env) || !env.ORDER_TOKEN_SECRET || typeof value !== "string" || !await equalSecret(value, env.CHECKOUT_TRIAL_SECRET!)) throw new ApiError(403, "trial_access_denied");
+  const expires = String(Date.now() + 3600000);
+  const signature = await hmac(env.ORDER_TOKEN_SECRET, `checkout-trial:${expires}:${env.CHECKOUT_TRIAL_SECRET}`);
+  const response = json({ authorized: true });
+  response.headers.set("Set-Cookie", `__Host-almira-trial=${expires}.${signature}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600`);
+  return response;
+}
 export function checkoutEnabled(env: Env) {
   return env.CHECKOUT_ENABLED === "true" && env.PANCAKE_WRITE_ENABLED === "true" &&
     /^\d+$/.test(env.PANCAKE_SHOP_ID || "") && !!env.PANCAKE_WAREHOUSE_ID && !!env.PANCAKE_WRITE_API_KEY && (env.ORDER_TOKEN_SECRET?.length || 0) >= 32;

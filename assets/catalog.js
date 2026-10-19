@@ -62,6 +62,7 @@
       state.products.splice(0, state.products.length, ...payload.products);
       state.snapshotId = payload.snapshotId;
       state.checkoutEnabled = payload.checkoutEnabled;
+      state.checkoutTrial = payload.checkoutTrial === true;
       state.stale = payload.stale;
       state.loaded = true;
       status.replaceChildren();
@@ -83,6 +84,7 @@
     get products() { return state.products; },
     get snapshotId() { return state.snapshotId; },
     get checkoutEnabled() { return state.checkoutEnabled; },
+    get checkoutTrial() { return state.checkoutTrial === true; },
     load
   };
   show("loading");
